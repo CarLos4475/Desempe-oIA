@@ -4,6 +4,8 @@
 
 **[Ver tablero interactivo](https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/)**
 
+[Diapositivas de la exposición](presentacion/index.html) · [Guion en PDF](presentacion/guion.pdf)
+
 Este proyecto estudia cómo un grupo de estudiantes incorpora herramientas de inteligencia artificial a sus actividades académicas y cómo describe su entorno universitario. Reúne el análisis de dos cuestionarios, un tablero interactivo y los informes técnico y de negocio.
 
 El interés está en conocer para qué se usa la IA, qué herramientas aparecen con mayor frecuencia y qué beneficios o dificultades perciben quienes respondieron. El desempeño académico se aborda desde esas percepciones: las encuestas no incluyen una medición objetiva de calificaciones o aprendizaje.
