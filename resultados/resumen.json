@@ -292,6 +292,219 @@
       "n_score_cero": 11
     }
   },
+  "limpieza": {
+    "ia": {
+      "filas": 24,
+      "columnas_cubiertas": 18,
+      "columnas": [
+        {
+          "campo": "timestamp_ia",
+          "tratamiento": "Conversión a fecha y hora. Entradas inválidas quedan como ausentes.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 0
+        },
+        {
+          "campo": "cuenta",
+          "tratamiento": "Clave privada validada con regex de nueve dígitos y verificación de unicidad.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 0
+        },
+        {
+          "campo": "herramientas_frecuencia",
+          "tratamiento": "Texto normalizado, alias por regex y similitud de nombres aislados.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 10
+        },
+        {
+          "campo": "fase_estudio",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 7
+        },
+        {
+          "campo": "cambio_estudio",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 11
+        },
+        {
+          "campo": "proceso_verificacion",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 7
+        },
+        {
+          "campo": "impacto_tiempo",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 13
+        },
+        {
+          "campo": "diferencia_calificaciones",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 1,
+          "ausentes_limpios": 1,
+          "modificados": 7
+        },
+        {
+          "campo": "independencia_resolucion",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 9
+        },
+        {
+          "campo": "impacto_estres",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 11
+        },
+        {
+          "campo": "reglas_personales",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 8
+        },
+        {
+          "campo": "pensamiento_critico",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 1,
+          "ausentes_limpios": 1,
+          "modificados": 10
+        },
+        {
+          "campo": "horas_ia_raw",
+          "tratamiento": "Texto normalizado y conversión posterior a horas mediante regex y reglas de unidades.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 4
+        },
+        {
+          "campo": "semestre_inicio_raw",
+          "tratamiento": "Texto normalizado y conversión posterior de ordinales a números de semestre.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 7
+        },
+        {
+          "campo": "reemplazo_laboral_raw",
+          "tratamiento": "Texto normalizado y clasificación posterior por patrones de respuesta.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 13
+        },
+        {
+          "campo": "guia_o_atajo_raw",
+          "tratamiento": "Texto normalizado y clasificación posterior por patrones de modalidad.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 10
+        },
+        {
+          "campo": "motivo_principal",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 10
+        },
+        {
+          "campo": "otros_usos_raw",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 10
+        }
+      ]
+    },
+    "bienestar": {
+      "filas": 19,
+      "columnas_cubiertas": 9,
+      "columnas": [
+        {
+          "campo": "cuenta",
+          "tratamiento": "Clave privada validada con regex de nueve dígitos y verificación de unicidad.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 0
+        },
+        {
+          "campo": "edad_raw",
+          "tratamiento": "Texto normalizado y conversión posterior a años mediante regex.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 1
+        },
+        {
+          "campo": "convivencia_raw",
+          "tratamiento": "Texto normalizado y unificación posterior en categorías de convivencia.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 3
+        },
+        {
+          "campo": "traslado_raw",
+          "tratamiento": "Texto normalizado y conversión posterior a minutos mediante regex y unidades.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 5
+        },
+        {
+          "campo": "ambiente_hogar",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 6
+        },
+        {
+          "campo": "calidad_sueno",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 5
+        },
+        {
+          "campo": "frecuencia_desanimo",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 6
+        },
+        {
+          "campo": "irritabilidad",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 8
+        },
+        {
+          "campo": "dificultad_concentracion",
+          "tratamiento": "Unicode NFC, espacios y marcas explícitas de ausencia. Se conserva el contenido.",
+          "ausentes_origen": 0,
+          "ausentes_limpios": 0,
+          "modificados": 9
+        }
+      ],
+      "columnas_fuera_de_alcance": [
+        "timestamp_bie",
+        "carrera_raw",
+        "semestre_raw",
+        "tranquilidad_estudio",
+        "apoyo_social",
+        "impacto_transporte",
+        "interes_materias",
+        "cambios_alimentacion"
+      ]
+    }
+  },
   "supervisado": {
     "estado": "ok",
     "objetivo": "Modalidad declarada mixta (1) frente a exclusiva: guía o atajo (0).",
@@ -418,6 +631,53 @@
           4
         ]
       ]
+    },
+    "ajuste": {
+      "metrica": "F1",
+      "n_folds": 5,
+      "busquedas": [
+        {
+          "metodo": "GridSearchCV",
+          "configuraciones": 16,
+          "parametros": {
+            "modelo__n_neighbors": 3,
+            "modelo__p": 1,
+            "modelo__weights": "uniform"
+          },
+          "media": 0.6266666666666667,
+          "desviacion": 0.11430952132988165,
+          "pliegues_validos": 5
+        },
+        {
+          "metodo": "RandomizedSearchCV",
+          "configuraciones": 8,
+          "parametros": {
+            "modelo__weights": "distance",
+            "modelo__p": 1,
+            "modelo__n_neighbors": 3
+          },
+          "media": 0.5599999999999999,
+          "desviacion": 0.28472208672083493,
+          "pliegues_validos": 5
+        }
+      ],
+      "mejor_metodo": "GridSearchCV",
+      "test": {
+        "accuracy": 0.8333333333333334,
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8888888888888888,
+        "confusion": [
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      }
     },
     "test_sensible_pp": 16.666666666666668
   },
@@ -546,35 +806,86 @@
   "clusters": {
     "estado": "ok",
     "n": 19,
-    "k": 2,
-    "silhouette": 0.36028906079671436,
+    "k": 4,
+    "silhouette": 0.11006183443179839,
     "siluetas": {
       "2": 0.36028906079671436,
       "3": 0.13413564372214082,
       "4": 0.1405533033855768,
       "5": 0.1399615774922359
     },
-    "silhouette_jerarquico": 0.35353114152430737,
+    "silhouette_jerarquico": 0.13291707311498058,
     "pca_varianza": [
       0.2604200762212247,
       0.23422891279524374
     ],
-    "tamanos": {
-      "0": 18,
-      "1": 1
+    "ajuste": {
+      "metrica": "Silueta",
+      "n_folds": 3,
+      "busquedas": [
+        {
+          "metodo": "GridSearchCV",
+          "configuraciones": 16,
+          "parametros": {
+            "modelo__init": "k-means++",
+            "modelo__n_clusters": 4,
+            "modelo__n_init": 20
+          },
+          "media": 0.1962813523921176,
+          "desviacion": 0.1697028580002597,
+          "pliegues_validos": 3
+        },
+        {
+          "metodo": "RandomizedSearchCV",
+          "configuraciones": 8,
+          "parametros": {
+            "modelo__n_init": 20,
+            "modelo__n_clusters": 4,
+            "modelo__init": "k-means++"
+          },
+          "media": 0.1962813523921176,
+          "desviacion": 0.1697028580002597,
+          "pliegues_validos": 3
+        }
+      ],
+      "mejor_metodo": "GridSearchCV",
+      "aplicado": true
     },
-    "perfiles_n_min_3": {},
+    "tamanos": {
+      "0": 1,
+      "1": 12,
+      "2": 1,
+      "3": 5
+    },
+    "perfiles_n_min_3": {
+      "1": {
+        "horas_ia_dia": 1.7639,
+        "semestre_inicio": 3.0,
+        "total_herramientas": 2.0833,
+        "traslado_min": 50.8333,
+        "score_beneficio_ia": 0.1512,
+        "score_bienestar": 0.0694
+      },
+      "3": {
+        "horas_ia_dia": 0.8167,
+        "semestre_inicio": 4.2,
+        "total_herramientas": 1.4,
+        "traslado_min": 56.0,
+        "score_beneficio_ia": 0.1183,
+        "score_bienestar": -0.1133
+      }
+    },
     "limite": "Exploratorio; perfiles con grupo o complemento n<3 omitidos. Grupos no son diagnósticos."
   },
   "metodologia": {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "semilla": 42,
     "polaridad": "Media por pregunta; lexicón contextual con negación. No validado como escala académica o clínica.",
     "faltantes": "Textos ausentes no inventados; bienestar sin encuesta = nulo; KNN solo dentro del pipeline supervisado.",
     "alcance": "Muestra encuestada, sin inferencia causal ni medición objetiva de rendimiento."
   },
   "proveniencia": {
-    "fecha": "2026-11-18T15:13:50-06:00",
+    "fecha": "2026-11-19T20:18:27-06:00",
     "fuentes": {
       "Desempeño académico por el uso de IA (Respuestas).xlsx": "c3b78b430a6677c93fb4312b89f061f991f9cbdd5497b30ab583716f9cc48f14",
       "Cuestionario_ Entorno Universitario y Bienestar.csv": "ffe2b8d0d2283a5e051c8de1bb6f256e85bcb451b8f651b6cebf70d96e879b27"

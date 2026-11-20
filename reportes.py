@@ -84,6 +84,17 @@ class Informe:
         i.hAlign='CENTER'
         return i
 
+    def tabla_busquedas(self, ajuste):
+        filas = [['Búsqueda', 'Pruebas', 'Configuración elegida', 'Media CV', 'DE', 'Pliegues válidos']]
+        for fila in ajuste['busquedas']:
+            parametros = ', '.join(f'{k.split("__")[-1]}={v}' for k, v in fila['parametros'].items())
+            filas.append([
+                fila['metodo'], fila['configuraciones'], parametros,
+                numero(fila['media']), numero(fila['desviacion']),
+                f'{fila["pliegues_validos"]}/{ajuste["n_folds"]}',
+            ])
+        return self.tabla(filas, [128, 51, 151, 60, 52, 78])
+
     def tecnica(self):
         r=self.r;m=r['muestra'];k=r['kpis'];c=r['clusters'];s=r['supervisado']
         filas=r['descriptivos'];rho=r['correlacion_traslado_ia']
@@ -96,10 +107,10 @@ class Informe:
             self.sub('PLANTEAMIENTO DEL PROBLEMA'),
             self.p('Las encuestas permiten describir experiencias y buscar asociaciones. Para saber si la IA mejora el desempeño académico harían falta calificaciones verificadas y un diseño que permita comparar cambios. Esos datos no están disponibles, así que el análisis mantiene sus conclusiones dentro de lo observado.'),
             self.sub('OBJETIVO GENERAL'),
-            self.p('Integrar los dos cuestionarios en un análisis reproducible que describa el uso de IA y el contexto estudiantil, compare clasificadores de modalidad y evalúe una regresión sobre las horas de uso declaradas.'),
+            self.p('Preparar los cuestionarios con Python, describir el uso de IA y el contexto estudiantil mediante indicadores, explorar agrupaciones con K-Means y evaluar si KNN ayuda a clasificar el uso declarado. La regresión de horas de IA es un ejercicio complementario.'),
             self.sub('OBJETIVOS ESPECÍFICOS'),
-            self.p('1. Validar las columnas y las claves antes de unir las fuentes.<br/>2. Unificar unidades y variantes de nombres de herramientas.<br/>3. Resumir temas con TF-IDF y explorar el lenguaje con polaridad léxica.<br/>4. Estudiar asociaciones y agrupaciones con el bienestar realmente observado.<br/>5. Evaluar clasificación con F1 y regresión con R², MAE y RMSE, usando prueba reservada.'),
-            self.nota('El notebook, el tablero y los informes usan los mismos resultados agregados. Las dos tareas predictivas tienen objetivos y particiones propios; sus métricas no son intercambiables.'),
+            self.p('1. Limpiar todos los campos de la encuesta de IA y las variables de bienestar que se incorporan al estudio.<br/>2. Validar las claves, unir las fuentes y explorar sus indicadores.<br/>3. Comparar GridSearchCV y RandomizedSearchCV en K-Means y KNN.<br/>4. Evaluar KNN en una prueba reservada y estimar horas de uso con una regresión complementaria.<br/>5. Compartir los indicadores y resultados en un tablero analítico.'),
+            self.nota('El notebook, el tablero y los informes usan los mismos resultados agregados. Cada tarea predictiva tiene su propio objetivo, sus particiones y sus métricas.'),
         ])
         paginas.append([
             self.h('ARQUITECTURA E INTEGRACIÓN DE DATOS'),
@@ -107,10 +118,10 @@ class Informe:
             self.tabla([
                 ['Módulo','Responsabilidad'],
                 ['1. Fuentes y validación','Verificar columnas, orden, identificadores de nueve dígitos, unicidad y presencia de archivos.'],
-                ['2. Limpieza y unión','Expresiones regulares, alias documentados y left join uno a uno.'],
+                ['2. Limpieza y unión','Normalización, expresiones regulares, similitud de cadenas para herramientas y unión uno a uno.'],
                 ['3. Texto y codificación','Corpus sin valores nan ni respuestas inventadas. Polaridad por pregunta con negación.'],
                 ['4. Descripción y agrupación','EDA de la muestra; asociaciones y clustering de registros con bienestar observado.'],
-                ['5. Modelos y evaluación','Clasificación estratificada y regresión de horas. Cada tarea usa su propia referencia, validación y prueba.'],
+                ['5. Modelos y evaluación','Búsqueda en cuadrícula y aleatoria para K-Means y KNN. Clasificación y regresión usan sus propias referencias y pruebas.'],
                 ['6. Salidas','JSON, tablas y figuras agregadas; reportes generados desde la misma ejecución.'],
             ],[135,385]),Spacer(1,14),
             self.tabla([
@@ -122,21 +133,34 @@ class Informe:
             ],[270,80,170]),
             self.nota('La clave se utiliza únicamente en memoria para el cruce. No se exportan cuentas, marcas temporales ni respuestas abiertas. Las encuestas originales permanecen locales, excluidas de Git.'),
         ])
+        limpieza = r.get('limpieza')
+        cobertura_limpieza = []
+        if limpieza:
+            ia = limpieza['ia']
+            bie = limpieza['bienestar']
+            cobertura_limpieza = [
+                self.p(f'El flujo aplica una regla o validación a los {ia["columnas_cubiertas"]} campos de la encuesta de IA y a {bie["columnas_cubiertas"]} campos del complemento. Los {len(bie["columnas_fuera_de_alcance"])} campos de bienestar ajenos al análisis quedan identificados en el registro de cobertura.'),
+                self.nota('El notebook muestra la regla, los ausentes de origen, los ausentes tras la limpieza y los valores modificados por campo. Los conteos proceden de Python y el archivo de resultados registra las huellas de ambas fuentes.'),
+            ]
         paginas.append([
             self.h('LIMPIEZA, REGEX Y DATOS AUSENTES'),
+            self.p('Python lee directamente las exportaciones originales. Los cambios se aplican en memoria y el cotejo por campo deja evidencia de qué pasó con las respuestas, incluso con las preguntas que sirven solo para describir el formulario.'),
             self.tabla([
                 ['Variable / caso','Regla aplicada'],
+                ['Cuenta y marca temporal','Validación del formato de las cuentas y conversión de la marca temporal. Se usan internamente y se excluyen de las salidas públicas.'],
+                ['Respuestas abiertas','Normalización de espacios y caracteres sin perder el contenido. Se conserva como ausente una respuesta en blanco. La pregunta sobre otros usos de IA también se prepara.'],
                 ['Horas de IA','Minutos / 60; “hora y media” = 1.5; “entre 1 y 3” = 2. Los rangos se aproximan y no representan mediciones exactas.'],
                 ['Semestre de inicio','Ordinales y dígitos. “Hace 3 semestres” se interpreta respecto al 7.º semestre de la cohorte descrita.'],
                 ['Edad y traslado','Se extraen edades; horas y minutos se convierten a minutos. No se recortan los valores extremos observados.'],
-                ['Herramientas','Chat GPT y Chargpt se unifican con ChatGPT; Deepsek con DeepSeek; no se cuenta dos veces un alias en la misma respuesta.'],
+                ['Herramientas','Los patrones y alias reconocen nombres como Chat GPT y Chargpt. La similitud sirve para detectar variantes cercanas de forma conservadora. Cada herramienta se cuenta una vez por respuesta.'],
                 ['Modalidad de uso','Guía, atajo, híbrido, contextual o no clasificable. “Depende” por sí solo no prueba modalidad híbrida.'],
                 ['Reemplazo laboral','Se distinguen Sí, No, Parcial / Depende e Indeciso antes de calcular porcentajes.'],
             ],[125,395]),
+            Spacer(1, 10), *cobertura_limpieza,
             self.sub('TRATAMIENTO DE AUSENCIAS'),
             self.p(f'Los {m["solo_ia"]} participantes sin segunda encuesta conservan bienestar nulo. Las {r["calidad"]["textos_ia_ausentes"]} respuestas abiertas faltantes de IA no se sustituyen por textos de otros estudiantes. Para describir entorno se usan solo los {m["emparejados"]} registros observados.'),
-            self.p('En clasificación, la escala y la imputación KNN (k=3) se aprenden únicamente con cada fold de entrenamiento. Se escala antes de calcular distancias y se añaden indicadores de ausencia. La imputación no se utiliza para simular respuestas textuales.'),
-            self.nota('Control de calidad de esta ejecución: no quedaron horas, semestres, edades ni traslados sin convertir entre los registros que sí los respondieron. La recuperación sin nulos no valida por sí sola la exactitud de cada aproximación textual.'),
+            self.p('En clasificación, cada pliegue aprende la escala y la imputación numérica por tres vecinos con sus propios datos de entrenamiento. La imputación añade indicadores de ausencia y se aplica a los predictores numéricos.'),
+            self.nota('Los conteos de horas, semestres, edades y traslados sin convertir se consultan en el notebook. Cuando la respuesta original da un rango, el valor convertido sigue siendo una aproximación.'),
         ])
         paginas.append([
             self.h('PROCESAMIENTO DE LENGUAJE NATURAL'),
@@ -179,37 +203,56 @@ class Informe:
         ])
         paginas.append([
             self.h('CLUSTERING Y PROYECCIÓN PCA'),
-            self.p(f'Se agruparon {c["n"]} registros observados, sin imputar bienestar. Se estandarizaron horas de IA, semestre de inicio, diversidad de herramientas, traslado y los dos indicadores léxicos. Entre k=2..5, K-Means obtuvo su mejor silhouette con k={c["k"]}: {c["silhouette"]:.3f}.'),
+            self.p(f'Se agruparon {c["n"]} registros con bienestar observado. Se estandarizaron horas de IA, semestre de inicio, diversidad de herramientas, traslado y los dos indicadores léxicos. La solución mostrada usa k={c["k"]} y tiene una silueta de {c["silhouette"]:.3f} en la muestra completa.'),
             self.img('clusters',maxalto=225),
             self.p(f'El clustering jerárquico con el mismo k obtuvo {c["silhouette_jerarquico"]:.3f}. Los dos primeros componentes PCA explican {100*sum(c["pca_varianza"]):.2f}% de la varianza: PC1 {100*c["pca_varianza"][0]:.2f}% y PC2 {100*c["pca_varianza"][1]:.2f}%.'),
             self.sub('GRUPOS PEQUEÑOS Y ESTABILIDAD'),
-            self.p('Silhouette resume qué tan separado queda cada grupo respecto de los demás: valores cercanos a 1 sugieren mayor separación. Elegir el mejor valor entre k=2 y k=5 solo identifica la mejor opción de este ensayo. No comprueba que existan perfiles estables fuera de la muestra.'),
+            self.p('La silueta resume qué tan separado queda cada grupo respecto de los demás. Un valor más cercano a 1 indica mayor separación según esta métrica. El recorrido de k entre 2 y 5 sobre la muestra completa sirve como comparación descriptiva. La separación observada aquí puede cambiar en otra muestra.'),
             self.p('Los tamaños desiguales muestran que pocos casos pueden explicar parte de la separación. Se omiten descripciones si el grupo o su complemento tienen menos de tres personas, para evitar que un agregado permita reconocer una respuesta individual. Los grupos sirven para plantear nuevas preguntas sobre los hábitos.'),
         ])
+        ajuste_c = c.get('ajuste')
+        ajuste_s = s.get('ajuste')
+        if ajuste_c and ajuste_s:
+            paginas.append([
+                self.h('CÓMO SE AJUSTARON K-MEANS Y KNN'),
+                self.p('GridSearchCV prueba cada combinación de la cuadrícula. RandomizedSearchCV prueba una selección de combinaciones con semilla fija. La media de validación y la dispersión entre pliegues permiten comparar los resultados bajo la misma partición dentro de cada tarea.'),
+                self.sub('K-MEANS · SILUETA EN VALIDACIÓN'),
+                self.tabla_busquedas(ajuste_c), Spacer(1, 9),
+                self.p('En cada pliegue se ajustan la escala y los centroides con los datos de entrenamiento. Luego se asignan los casos de validación a esos centroides. Cuando las etiquetas obtenidas no permiten calcular la silueta se aplica una penalización de -1 para elegir la configuración. La columna de pliegues válidos distingue los que sí permitieron calcularla.'),
+                self.nota(f'Método seleccionado para K-Means: {ajuste_c["mejor_metodo"] or "ninguno con pliegues válidos"}.'),
+                self.sub('KNN · F1 EN VALIDACIÓN ESTRATIFICADA'),
+                self.tabla_busquedas(ajuste_s), Spacer(1, 9),
+                self.p('La búsqueda de KNN se realiza solo con los datos de entrenamiento. Cada pliegue vuelve a aprender las transformaciones. F1 determina la configuración elegida. En los parámetros, p=1 corresponde a distancia Manhattan y p=2 a euclidiana. La prueba reservada se consulta al final.'),
+                self.nota(f'Método seleccionado para KNN: {ajuste_s["mejor_metodo"]}. Se reporta la media y la desviación estándar (DE) de la mejor configuración de cada búsqueda.'),
+            ])
         cv=[['Clasificador','Accuracy CV','DE','F1 CV','DE']]
         cv.extend([[x['modelo'],f'{x["cv_accuracy"]:.3f}',f'{x["cv_accuracy_sd"]:.3f}',f'{x["cv_f1"]:.3f}',f'{x["cv_f1_sd"]:.3f}'] for x in s['cv']])
         paginas.append([
-            self.h('CLASIFICACIÓN SUPERVISADA Y VALIDACIÓN'),
-            self.p(f'Objetivo: {s["objetivo"]} Se etiquetaron {s["n_etiquetados"]} respuestas ({s["clases"]["mixta"]} mixtas y {s["clases"]["exclusiva"]} exclusivas); {s["n_excluidos"]} ambiguas o no clasificables se excluyeron.'),
+            self.h('CLASIFICADORES CON PARÁMETROS FIJOS'),
+            self.p(f'La variable objetivo distingue la modalidad mixta (1) de la exclusiva como guía o atajo (0). Se etiquetaron {s["n_etiquetados"]} respuestas, {s["clases"]["mixta"]} mixtas y {s["clases"]["exclusiva"]} exclusivas. Se excluyeron {s["n_excluidos"]} por ambigüedad o falta de una categoría clara.'),
             self.p('La pregunta de modalidad no se incluye en los predictores. Se combinan siete variables estructuradas con TF-IDF de otras preguntas, reducido a un máximo de cuatro componentes PCA según disponibilidad. Un vocabulario vacío aporta ceros. Cada fold ajusta escala, imputación, vocabulario y PCA.'),
             self.p(f'Se reservan {s["n_test"]} casos para prueba. La validación cruzada estratificada de {s["n_folds"]} folds se aplica solo a los {s["n_train"]} casos de entrenamiento. Se compara contra la estrategia de predecir siempre la clase mayoritaria.'),
             self.tabla(cv,[180,85,85,85,85]),Spacer(1,10),
             self.img('modelos_cv',maxalto=205),
-            self.nota('F1 combina precisión y recall para la modalidad mixta, considerada positiva. Accuracy indica la proporción total de aciertos. CV es validación cruzada y DE describe cuánto cambiaron los resultados entre pliegues; no es un intervalo de confianza.'),
+            self.nota('Esta comparación exploratoria usa configuraciones fijas. El KNN ajustado de la página anterior tiene su propia evaluación. F1 combina precisión y recall para la modalidad mixta. Accuracy indica la proporción total de aciertos. CV significa validación cruzada y DE describe la variación entre pliegues.'),
         ])
         t=s['test'];b=s['baseline_test']
+        comparacion_prueba = [
+            ['Evaluación sobre prueba','Accuracy','Precisión','Recall','F1'],
+            [s['seleccionado'],numero(t['accuracy']),numero(t['precision']),numero(t['recall']),numero(t['f1'])],
+        ]
+        if ajuste_s and ajuste_s.get('test') and not s['seleccionado'].startswith('KNN'):
+            knn = ajuste_s['test']
+            comparacion_prueba.append(['KNN ajustado',numero(knn['accuracy']),numero(knn['precision']),numero(knn['recall']),numero(knn['f1'])])
+        comparacion_prueba.append(['Baseline (mayoría)',numero(b['accuracy']),numero(b['precision']),numero(b['recall']),numero(b['f1'])])
         mensaje=('El candidato supera el F1 medio del baseline en esta CV, sin acreditar significación ni generalización.' if s['supera_baseline_cv'] else 'El candidato no supera el F1 medio del baseline en validación cruzada. No se acredita ventaja predictiva para uso operativo.')
         paginas.append([
             self.h('PRUEBA RESERVADA, LÍMITES Y CONCLUSIONES'),
             self.p(f'Entre los cuatro modelos entrenables, se seleccionó {s["seleccionado"]} por F1 medio de CV, sin consultar la prueba. {mensaje}'),
-            self.tabla([
-                ['Evaluación sobre prueba','Accuracy','Precisión','Recall','F1'],
-                [s['seleccionado'],f'{t["accuracy"]:.3f}',f'{t["precision"]:.3f}',f'{t["recall"]:.3f}',f'{t["f1"]:.3f}'],
-                ['Baseline (mayoría)',f'{b["accuracy"]:.3f}',f'{b["precision"]:.3f}',f'{b["recall"]:.3f}',f'{b["f1"]:.3f}'],
-            ],[180,85,85,85,85]),Spacer(1,8),self.img('confusion',ancho=350,maxalto=190),
+            self.tabla(comparacion_prueba,[180,85,85,85,85]),Spacer(1,8),self.img('confusion',ancho=350,maxalto=190),
             self.p(f'Con n={s["n_test"]} en prueba, un acierto cambia accuracy en {s["test_sensible_pp"]:.1f} puntos porcentuales. El resultado puntual no corrige la inestabilidad observada entre folds.'),
             self.sub('CONCLUSIONES Y REPRODUCIBILIDAD'),
-            self.p('El análisis permite describir las respuestas y repetir los cálculos. La ventaja de un clasificador debe sostenerse frente a una referencia sencilla y con más datos. En esta ejecución, el F1 de validación no respalda usar los modelos para decidir sobre estudiantes.'),
+            self.p('La ventaja de un clasificador debe sostenerse frente a una referencia sencilla y con más datos. Esta evaluación sirve para entender qué aprende el modelo y cuánto cambian sus aciertos con la partición. Para tomar decisiones sobre estudiantes harían falta datos adicionales y una evaluación independiente.'),
             self.nota('Las páginas siguientes presentan una tarea distinta: estimar horas de uso con regresión. Fuente: resultados/resumen.json, metodología '+r['metodologia']['version']+', ejecución '+r['proveniencia']['fecha'][:10]+'. Las encuestas originales se conservan sin cambios.'),
         ])
         g=r['regresion'];lineal=g['modelos'][0];base=g['modelos'][1]
@@ -279,7 +322,7 @@ class Informe:
         ])
         p.append([
             self.h('SEGMENTACIÓN EXPLORATORIA'),
-            self.p(f'K-Means se aplicó a {c["n"]} participantes con entorno observado. Entre k=2..5, la mejor puntuación ensayada fue k={c["k"]}, con silhouette {c["silhouette"]:.3f}. Los grupos tienen tamaños '+', '.join(str(x) for x in c['tamanos'].values())+'.'),
+            self.p(f'K-Means se aplicó a {c["n"]} participantes con entorno observado. Se probaron una búsqueda en cuadrícula y otra aleatoria para elegir la configuración. En la muestra completa quedaron {c["k"]} grupos, de tamaños '+', '.join(str(x) for x in c['tamanos'].values())+f'. Su silueta de {c["silhouette"]:.3f} resume la separación dentro de esta muestra.'),
             self.img('clusters',maxalto=240),
             self.sub('LO QUE PERMITE ESTA EXPLORACIÓN'),
             self.p('La separación puede depender de unos pocos casos con valores muy distintos. Esto ayuda a detectar preguntas que vale la pena estudiar, pero todavía no permite definir perfiles estables del alumnado. Para cuidar la privacidad se omiten descripciones cuando un grupo o su complemento tienen menos de tres personas.'),
@@ -304,7 +347,7 @@ class Informe:
                 ['Mejorar la recolección',f'La cohorte es pequeña y {m["solo_ia"]} personas carecen de encuesta complementaria.','Repetir el instrumento, registrar cobertura y reunir un resultado académico independiente con consentimiento.'],
             ],[128,180,212]),Spacer(1,14),
             self.sub('CÓMO LEER EL TABLERO'),
-            self.p('El tablero presenta los indicadores junto con su tamaño de muestra. En Modelos se distinguen clasificación, regresión y agrupación, porque cada ejercicio responde una pregunta diferente. Los porcentajes de herramientas mantienen la base de 24 respuestas. Los agregados no permiten reconstruir cruces entre personas, y las metas conservan su carácter de propuesta.'),
+            self.p(f'El tablero en Streamlit presenta los indicadores junto con su tamaño de muestra. En Modelos se pueden consultar las búsquedas de clasificación y agrupación, y la regresión de horas. Los porcentajes de herramientas tienen como base las {n} respuestas. Las metas de seguimiento siguen siendo propuestas para un piloto.'),
         ])
         g=r['regresion'];lineal=g['modelos'][0]['prueba'];referencia=g['modelos'][1]['prueba']
         p.append([
@@ -323,15 +366,22 @@ class Informe:
             self.nota(f'La validación con {g["n_folds"]} pliegues también cambia mucho entre particiones pequeñas. Con {g["n_test"]} casos de prueba, esta evaluación sirve para reconocer los límites del modelo y orientar una recolección más amplia. No respalda decisiones individuales ni conclusiones sobre calificaciones.'),
         ])
         mejor=cv[s['seleccionado']];base=cv['Baseline (mayoría)']
+        knn = s.get('ajuste', {}).get('test')
+        lectura_knn = []
+        if knn:
+            ajuste = s['ajuste']
+            f1_cv = next(fila['media'] for fila in ajuste['busquedas'] if fila['metodo'] == ajuste['mejor_metodo'])
+            lectura_knn.append(self.p(f'KNN ajustado obtuvo F1 medio de {f1_cv:.3f} en validación y {knn["f1"]:.3f} en la prueba. La referencia mayoritaria obtuvo {cv["Baseline (mayoría)"]["cv_f1"]:.3f} y {s["baseline_test"]["f1"]:.3f}, respectivamente. Con pocos casos, la comparación puede cambiar de una partición a otra.'))
         p.append([
             self.h('RESULTADO PREDICTIVO Y CONCLUSIONES'),
             self.p(f'La clasificación distingue uso mixto frente a uso exclusivo declarado, no aprendizaje efectivo. Se utilizaron {s["n_etiquetados"]} respuestas etiquetables; {s["n_excluidos"]} ambiguas se excluyeron. El conjunto de prueba tiene solo {s["n_test"]} casos.'),
-            self.img('modelos_cv',maxalto=220),
-            self.p(f'Entre los cuatro clasificadores, {s["seleccionado"]} obtuvo F1 medio de CV {mejor["cv_f1"]:.3f}, frente a {base["cv_f1"]:.3f} del baseline mayoritario. '+('Esta ventaja puntual necesita confirmación independiente.' if s['supera_baseline_cv'] else 'No se observó ventaja por F1 frente al baseline; el modelo no se recomienda para decisiones sobre estudiantes.')),
-            self.p(f'El accuracy de prueba del candidato fue {100*s["test"]["accuracy"]:.1f}%, pero una sola predicción cambia ese porcentaje en {s["test_sensible_pp"]:.1f} puntos. No es una tasa demostrada de predicción del desempeño académico.'),
+            *lectura_knn,
+            self.img('modelos_cv',maxalto=185),
+            self.p(f'En la comparación con parámetros fijos, {s["seleccionado"]} obtuvo F1 medio de {mejor["cv_f1"]:.3f} en validación, frente a {base["cv_f1"]:.3f} de la referencia mayoritaria. '+('Esta ventaja puntual necesita confirmación independiente.' if s['supera_baseline_cv'] else 'La muestra aporta evidencia limitada para usar un clasificador en decisiones sobre estudiantes.')),
+            self.p(f'{s["seleccionado"]} acertó {100*s["test"]["accuracy"]:.1f}% de las modalidades en prueba. Con {s["n_test"]} casos, un acierto cambia el resultado en {s["test_sensible_pp"]:.1f} puntos porcentuales.'),
             self.sub('CONCLUSIÓN PARA LA TOMA DE DECISIONES'),
             self.p('El aporte del proyecto está en describir hábitos, reunir percepciones y hacer visibles los límites de los modelos. En esta ejecución, '+('la clasificación superó la referencia por F1 en validación' if s['supera_baseline_cv'] else 'la clasificación no superó la referencia por F1 en validación')+' y '+('la regresión redujo el error medio frente al promedio' if lineal['mae_h']<referencia['mae_h'] else 'la regresión no redujo el error medio frente al promedio')+'. El siguiente paso es ampliar la muestra y probar actividades de formación con resultados académicos medidos de forma independiente.'),
-            self.nota('El notebook, el tablero y estos informes consultan resultados/resumen.json. Metodología '+r['metodologia']['version']+', ejecución '+r['proveniencia']['fecha'][:10]+'. Las portadas originales y el estilo de los documentos se conservan.'),
+            self.nota('El notebook, el tablero y estos informes consultan resultados/resumen.json. Metodología '+r['metodologia']['version']+', ejecución '+r['proveniencia']['fecha'][:10]+'.'),
         ])
         return p
 

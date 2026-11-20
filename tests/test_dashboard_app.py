@@ -9,6 +9,16 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 class DashboardAppTest(unittest.TestCase):
+    def test_muestra_las_dos_busquedas_en_ambas_tareas(self):
+        at = AppTest.from_file(str(ROOT/'dashboard.py'), default_timeout=30).run()
+        at.radio(key='vista').set_value('Modelos').run()
+        self.assertEqual(len(at.exception), 0)
+        tablas = [d.value for d in at.dataframe if 'Búsqueda' in d.value.columns]
+        self.assertEqual(len(tablas), 2)
+        for tabla in tablas:
+            self.assertEqual(set(tabla['Búsqueda']), {'GridSearchCV', 'RandomizedSearchCV'})
+            self.assertEqual(tabla['Combinaciones'].tolist(), [16, 8])
+
     def test_cinco_vistas_sin_excepciones(self):
         at=AppTest.from_file(str(ROOT/'dashboard.py'),default_timeout=30).run()
         self.assertEqual(len(at.exception),0)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-VERSION_ADAPTADOR=2
+VERSION_ADAPTADOR=3
 
 NOMBRES_HERRAMIENTAS={'gemini':'Gemini','chatgpt':'ChatGPT','claude':'Claude',
                      'deepseek':'DeepSeek','copilot':'Copilot','notebooklm':'NotebookLM',
@@ -61,6 +61,32 @@ def _metricas(obj):
     return r
 
 
+def _ajuste(obj, metrica):
+    metodos = {'GridSearchCV', 'RandomizedSearchCV'}
+    n_folds = _numeros(obj, ('n_folds',), enteros=('n_folds',))['n_folds']
+    if obj['metrica'] != metrica or obj['mejor_metodo'] not in metodos or n_folds < 2:
+        raise ValueError
+    parametros = ({'modelo__n_neighbors': (1, 3, 5, 7), 'modelo__p': (1, 2),
+                   'modelo__weights': ('uniform', 'distance')} if metrica == 'F1' else
+                  {'modelo__n_clusters': (2, 3, 4, 5), 'modelo__n_init': (10, 20),
+                   'modelo__init': ('k-means++', 'random')})
+    filas = []
+    for fila in obj['busquedas']:
+        vals = _numeros(fila, ('media', 'desviacion', 'configuraciones', 'pliegues_validos'),
+                        enteros=('configuraciones', 'pliegues_validos'))
+        if (not (-1 if metrica == 'Silueta' else 0) <= vals['media'] <= 1 or vals['desviacion'] < 0 or
+                not 0 <= vals['pliegues_validos'] <= n_folds or vals['configuraciones'] < 1):
+            raise ValueError
+        elegidos = {nombre: fila['parametros'][nombre] for nombre in parametros}
+        if any(valor not in parametros[nombre] for nombre, valor in elegidos.items()):
+            raise ValueError
+        filas.append({**vals, 'metodo': fila['metodo'], 'parametros': elegidos})
+    if len(filas) != 2 or {fila['metodo'] for fila in filas} != metodos:
+        raise ValueError
+    return {'metrica': metrica, 'n_folds': n_folds, 'busquedas': filas,
+            'mejor_metodo': obj['mejor_metodo']}
+
+
 def _supervisado(obj):
     if obj['estado']=='insuficiente':
         return {'estado':'insuficiente','motivo':'No hay suficientes respuestas por clase para evaluar esta parte del estudio.'}
@@ -80,6 +106,12 @@ def _supervisado(obj):
         item.update(modelo=fila['modelo'],fold_f1=folds);cv.append(item)
     if 'Baseline (mayoría)' not in [x['modelo'] for x in cv] or r['seleccionado'] not in [x['modelo'] for x in cv]:raise ValueError
     r.update(cv=cv,test=_metricas(obj['test']),baseline_test=_metricas(obj['baseline_test']),test_sensible_pp=100/r['n_test'])
+    if 'ajuste' in obj:
+        ajuste = _ajuste(obj['ajuste'], 'F1')
+        ajuste['test'] = _metricas(obj['ajuste']['test'])
+        if ajuste['n_folds'] != r['n_folds'] or sum(map(sum, ajuste['test']['confusion'])) != r['n_test']:
+            raise ValueError
+        r['ajuste'] = ajuste
     return r
 
 
@@ -132,6 +164,12 @@ def _clusters(obj):
         any(type(v) is not int or v<1 for v in tamanos.values()) or sum(tamanos.values())!=r['n'] or
         not isinstance(var,list) or len(var)!=2 or any(type(x) not in (int,float) or not 0<=x<=1 for x in var)):raise ValueError
     r.update(estado='ok',siluetas=siluetas,tamanos=tamanos,pca_varianza=var)
+    if 'ajuste' in obj:
+        ajuste = _ajuste(obj['ajuste'], 'Silueta')
+        aplicado = obj['ajuste']['aplicado']
+        if type(aplicado) is not bool:
+            raise ValueError
+        r['ajuste'] = {**ajuste, 'aplicado': aplicado}
     return r
 
 
@@ -181,6 +219,11 @@ def leer_resumen(ruta:Path) -> dict:
         limpio['tfidf_top']={k:v for k,v in r['tfidf_top'].items() if re.fullmatch(r'[a-z ]{1,64}',k) and type(v) in (int,float) and math.isfinite(v) and 0<=v<=1}
         limpio['semestre_inicio']={k:v for k,v in r['semestre_inicio'].items() if re.fullmatch(r'[1-9]',k) and type(v) is int and 0<=v<=m['ia']}
         limpio['calidad']=_numeros(r['calidad'],('textos_ia_ausentes',),enteros=('textos_ia_ausentes',))
+        if 'limpieza' in r:
+            limpio['limpieza'] = {
+                fuente: _numeros(r['limpieza'][fuente], ('columnas_cubiertas',), enteros=('columnas_cubiertas',))
+                for fuente in ('ia', 'bienestar')
+            }
         limpio['polaridad_por_pregunta']={k:_numeros(v,('n','media','n_score_cero'),enteros=('n','n_score_cero'),nulos=True) for k,v in r.get('polaridad_por_pregunta',{}).items() if k in PREGUNTAS}
         fecha=r['proveniencia']['fecha'];datetime.fromisoformat(fecha)
         versiones={k:v for k,v in r['proveniencia']['versiones'].items() if k in ('pandas','numpy','scikit-learn','scipy','matplotlib') and isinstance(v,str) and re.fullmatch(r'[0-9a-zA-Z.+_-]{1,30}',v)}

@@ -32,11 +32,15 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
                              mean_absolute_error, precision_score, r2_score,
                              recall_score, root_mean_squared_error, silhouette_score)
-from sklearn.model_selection import KFold, StratifiedKFold, cross_validate, train_test_split
+from sklearn.model_selection import (GridSearchCV, KFold, ParameterGrid,
+                                     RandomizedSearchCV, StratifiedKFold,
+                                     cross_validate, train_test_split)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from sklearn.svm import SVC
+
+from limpieza_encuestas import detectar_herramientas, limpiar_fuentes
 
 ARCHIVO_IA = 'Desempeño académico por el uso de IA (Respuestas).xlsx'
 ARCHIVO_BIE = 'Cuestionario_ Entorno Universitario y Bienestar.csv'
@@ -191,8 +195,7 @@ def parse_traslado_min(valor) -> float:
 
 
 def extraer_herramientas(valor) -> set[str]:
-    t = normalizar(valor)
-    return {nombre for nombre, patron in HERRAMIENTAS.items() if re.search(patron,t)}
+    return detectar_herramientas(normalizar(valor), HERRAMIENTAS, original=texto(valor))
 
 
 def clasificar_proposito(valor) -> str:
@@ -297,6 +300,7 @@ def _corpus(fila: pd.Series) -> str:
 
 def preparar_datos(ia: pd.DataFrame, bie: pd.DataFrame) -> pd.DataFrame:
     ia, bie = validar_cuentas(ia,'IA'), validar_cuentas(bie,'Bienestar')
+    ia, bie, auditoria = limpiar_fuentes(ia, bie)
     ia['horas_ia_dia'] = ia['horas_ia_raw'].map(parse_horas_ia)
     ia['semestre_inicio'] = ia['semestre_inicio_raw'].map(parse_semestre_inicio)
     tools = ia['herramientas_frecuencia'].map(extraer_herramientas)
@@ -315,6 +319,7 @@ def preparar_datos(ia: pd.DataFrame, bie: pd.DataFrame) -> pd.DataFrame:
     df = ia.merge(bie,on='cuenta',how='left',validate='one_to_one',indicator=True)
     df['tiene_bienestar'] = df.pop('_merge').eq('both')
     df['corpus_bie'] = df['corpus_bie'].fillna('')
+    df.attrs['limpieza'] = auditoria
     return df
 
 
@@ -401,6 +406,39 @@ def _metricas(y, pred) -> dict:
             'confusion':confusion_matrix(y,pred,labels=[0,1]).tolist()}
 
 
+def comparar_busquedas(pipeline, parametros, cv, X, y=None, *, scoring, metrica):
+    """Compara búsqueda exhaustiva y muestreo reproducible con los mismos pliegues."""
+    refit = 'silueta' if metrica == 'Silueta' else True
+    sufijo = 'silueta' if metrica == 'Silueta' else 'score'
+    opciones = {'scoring': scoring, 'refit': refit, 'cv': cv, 'error_score': 'raise'}
+    n_iter = min(8, len(ParameterGrid(parametros)) // 2)
+    buscadores = (
+        GridSearchCV(pipeline, parametros, **opciones),
+        RandomizedSearchCV(pipeline, parametros, n_iter=n_iter, random_state=42, **opciones),
+    )
+    filas = []
+    for buscador in buscadores:
+        buscador.fit(X, y)
+        resultados = buscador.cv_results_
+        indice = buscador.best_index_
+        n_validos = buscador.n_splits_
+        if metrica == 'Silueta':
+            n_validos = sum(int(resultados[f'split{i}_test_valido'][indice])
+                            for i in range(buscador.n_splits_))
+        filas.append({
+            'metodo': type(buscador).__name__,
+            'configuraciones': len(resultados['params']),
+            'parametros': buscador.best_params_,
+            'media': float(buscador.best_score_),
+            'desviacion': float(resultados[f'std_test_{sufijo}'][indice]),
+            'pliegues_validos': n_validos,
+        })
+    indice = max(range(len(filas)), key=lambda i: (filas[i]['media'], filas[i]['pliegues_validos']))
+    resumen = {'metrica': metrica, 'n_folds': buscadores[indice].n_splits_,
+               'busquedas': filas, 'mejor_metodo': filas[indice]['metodo']}
+    return resumen, buscadores[indice].best_estimator_
+
+
 def evaluar_modelos(df: pd.DataFrame) -> dict:
     X,y = datos_supervisados(df)
     if y.nunique()!=2 or y.value_counts().min()<4:
@@ -408,6 +446,9 @@ def evaluar_modelos(df: pd.DataFrame) -> dict:
     Xtr,Xte,ytr,yte = train_test_split(X,y,test_size=.25,stratify=y,random_state=42)
     nfolds = min(5,int(ytr.value_counts().min()))
     cv = StratifiedKFold(n_splits=nfolds,shuffle=True,random_state=42)
+    minimo_entrenamiento = min(len(indices) for indices, _ in cv.split(Xtr, ytr))
+    parametros_knn = {'modelo__n_neighbors': [k for k in (1, 3, 5, 7) if k <= minimo_entrenamiento],
+                      'modelo__weights': ['uniform', 'distance'], 'modelo__p': [1, 2]}
     modelos = {
         'Regresión logística':LogisticRegression(max_iter=1000,random_state=42),
         'Random Forest':RandomForestClassifier(n_estimators=100,max_depth=3,random_state=42),
@@ -429,6 +470,9 @@ def evaluar_modelos(df: pd.DataFrame) -> dict:
     ganador = orden.loc[orden['modelo']!='Baseline (mayoría)','modelo'].iloc[0]
     mejor = clone(pipelines[ganador]).fit(Xtr,ytr)
     baseline = DummyClassifier(strategy='most_frequent').fit(Xtr,ytr)
+    ajuste, knn_ajustado = comparar_busquedas(pipelines['KNN'], parametros_knn, cv, Xtr, ytr,
+                                             scoring='f1', metrica='F1')
+    ajuste['test'] = _metricas(yte, knn_ajustado.predict(Xte))
     return {'estado':'ok', 'objetivo':'Modalidad declarada mixta (1) frente a exclusiva: guía o atajo (0).',
             'n_etiquetados':len(y), 'n_excluidos':len(df)-len(y),
             'clases':{'mixta':int(y.sum()),'exclusiva':int((y==0).sum())},
@@ -441,6 +485,7 @@ def evaluar_modelos(df: pd.DataFrame) -> dict:
             'seleccion':'Mayor F1 medio de CV solo en entrenamiento; desempate por accuracy y menor dispersión.',
             'test':_metricas(yte,mejor.predict(Xte)),
             'baseline_test':_metricas(yte,baseline.predict(Xte)),
+            'ajuste':ajuste,
             'test_sensible_pp':100/len(yte)}
 
 
@@ -499,19 +544,46 @@ def evaluar_regresion(df: pd.DataFrame) -> dict:
             'alcance':'Horas declaradas de uso de IA. No mide calificaciones ni efectos causales. Muestra pequeña; R² puede ser negativo.'}
 
 
+def evaluar_silueta(pipeline, validacion):
+    escalados = pipeline.named_steps['escalar'].transform(validacion)
+    etiquetas = pipeline.predict(validacion)
+    if not 2 <= len(np.unique(etiquetas)) < len(validacion):
+        return {'silueta': -1., 'valido': 0.}
+    return {'silueta': float(silhouette_score(escalados, etiquetas)), 'valido': 1.}
+
+
 def analizar_clusters(df: pd.DataFrame) -> dict:
     reales = df.loc[df['tiene_bienestar'],FEATURES_CLUSTER].dropna()
     if len(reales)<7:
         return {'estado':'insuficiente','n':len(reales)}
+    n_folds = 3 if len(reales) >= 9 else 2
+    cv = KFold(n_splits=n_folds, shuffle=True, random_state=42)
+    distintos = len(reales.drop_duplicates())
+    tope_cv = min(5, *(min(len(va) - 1, len(reales.iloc[tr].drop_duplicates()))
+                        for tr, va in cv.split(reales)))
+    if tope_cv < 2:
+        return {'estado':'insuficiente','n':len(reales)}
+
+    pipeline = Pipeline([('escalar', StandardScaler()), ('modelo', KMeans(random_state=42))])
+    parametros = {'modelo__n_clusters': list(range(2, tope_cv + 1)),
+                  'modelo__init': ['k-means++', 'random'], 'modelo__n_init': [10, 20]}
+    ajuste, mejor = comparar_busquedas(pipeline, parametros, cv, reales,
+                                      scoring=evaluar_silueta, metrica='Silueta')
     X = StandardScaler().fit_transform(reales)
-    scores={}
-    ajustes={}
-    for k in range(2,min(5,len(X)-1)+1):
-        km=KMeans(n_clusters=k,n_init=10,random_state=42).fit(X)
-        scores[k]=float(silhouette_score(X,km.labels_))
-        ajustes[k]=km
-    mejor_k=max(scores,key=scores.get)
-    labels=ajustes[mejor_k].labels_
+    exploratorios = {k: KMeans(n_clusters=k, n_init=10, random_state=42).fit_predict(X)
+                     for k in range(2, min(5, len(X) - 1, distintos) + 1)}
+    scores = {k: float(silhouette_score(X, grupos)) for k, grupos in exploratorios.items()
+              if len(np.unique(grupos)) >= 2}
+    fila = next(f for f in ajuste['busquedas'] if f['metodo'] == ajuste['mejor_metodo'])
+    labels = mejor.named_steps['modelo'].labels_
+    ajuste['aplicado'] = fila['pliegues_validos'] > 0 and len(np.unique(labels)) >= 2
+    if ajuste['aplicado']:
+        mejor_k = mejor.named_steps['modelo'].n_clusters
+    else:
+        if not scores:
+            return {'estado':'insuficiente','n':len(reales)}
+        mejor_k = max(scores, key=scores.get)
+        labels = exploratorios[mejor_k]
     jerarquico=AgglomerativeClustering(n_clusters=mejor_k).fit_predict(X)
     pca=PCA(n_components=2,random_state=42).fit(X)
     perfiles=reales.assign(grupo=labels).groupby('grupo')[FEATURES_CLUSTER].mean()
@@ -520,9 +592,10 @@ def analizar_clusters(df: pd.DataFrame) -> dict:
     publicables=(tamanos>=3)&((len(reales)-tamanos)>=3)
     perfiles=perfiles.loc[tamanos[publicables].index].round(4)
     return {'estado':'ok','n':len(reales),'k':mejor_k,
-            'silhouette':scores[mejor_k],'siluetas':{str(k):v for k,v in scores.items()},
+            'silhouette':float(silhouette_score(X,labels)),'siluetas':{str(k):v for k,v in scores.items()},
             'silhouette_jerarquico':float(silhouette_score(X,jerarquico)),
             'pca_varianza':pca.explained_variance_ratio_.tolist(),
+            'ajuste':ajuste,
             'tamanos':{str(k):int(v) for k,v in tamanos.items()},
             'perfiles_n_min_3':{str(k):v for k,v in perfiles.to_dict(orient='index').items()},
             'limite':'Exploratorio; perfiles con grupo o complemento n<3 omitidos. Grupos no son diagnósticos.'}
@@ -599,11 +672,12 @@ def analizar(data_dir: str | Path) -> Resultado:
     ia,bie=cargar_fuentes(data_dir)
     df=preparar_datos(ia,bie)
     r=resumir(df,len(bie))
+    r['limpieza']=df.attrs['limpieza']
     r['supervisado']=evaluar_modelos(df)
     r['regresion']=evaluar_regresion(df)
     r['clusters']=analizar_clusters(df)
     r['metodologia']={
-        'version':'2.1.0','semilla':42,
+        'version':'2.2.0','semilla':42,
         'polaridad':'Media por pregunta; lexicón contextual con negación. No validado como escala académica o clínica.',
         'faltantes':'Textos ausentes no inventados; bienestar sin encuesta = nulo; KNN solo dentro del pipeline supervisado.',
         'alcance':'Muestra encuestada, sin inferencia causal ni medición objetiva de rendimiento.',
@@ -637,6 +711,18 @@ def exportar(resultado: Resultado, out: str | Path) -> None:
     pd.DataFrame(r['descriptivos']).T.to_csv(out/'descriptivos.csv',encoding='utf-8-sig',index_label='variable')
     if r['supervisado']['estado']=='ok':
         pd.DataFrame(r['supervisado']['cv']).drop(columns=['fold_f1']).to_csv(out/'modelos_cv.csv',index=False,encoding='utf-8-sig')
+    filas_ajuste = []
+    for clave, modelo in [('clusters', 'K-Means'), ('supervisado', 'KNN')]:
+        if r[clave]['estado'] != 'ok':
+            continue
+        ajuste = r[clave]['ajuste']
+        for fila in ajuste['busquedas']:
+            filas_ajuste.append({'modelo': modelo, 'metrica': ajuste['metrica'],
+                                 'pliegues': ajuste['n_folds'], **fila,
+                                 'parametros': json.dumps(fila['parametros'], ensure_ascii=False)})
+    pd.DataFrame(filas_ajuste, columns=['modelo', 'metrica', 'pliegues', 'metodo', 'configuraciones',
+                                       'parametros', 'media', 'desviacion', 'pliegues_validos']).to_csv(
+        out/'ajuste_modelos.csv', index=False, encoding='utf-8-sig')
     if r['regresion']['estado']=='ok':
         tabla=[{'modelo':m['modelo'],'evaluacion':etapa,**metricas}
                for m in r['regresion']['modelos']

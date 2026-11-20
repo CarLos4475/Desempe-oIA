@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persona 3 · Ensayo del tablero</title>
+<style>
+:root{color-scheme:light;--ink:#143451;--blue:#205681;--navy:#112c43;--paper:#f8f4e8;--card:#fffdf7;--line:#ddd6c0;--muted:#4c6474;--gold:#f8e6a2;--white:#fffdf7}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 "Segoe UI",sans-serif}
+a{color:var(--blue);text-underline-offset:3px}
+button,a,summary{touch-action:manipulation}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #357fba;outline-offset:4px}
+header{background:var(--navy);color:var(--white);border-bottom:5px solid #d6ae50}
+.wrap{width:min(1320px,100% - 56px);margin:auto}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:22px 0;border-bottom:1px solid #ffffff30}
+.brand span{font-size:14px;font-weight:650;letter-spacing:.065em}
+.headlink{color:var(--white);font-size:14px}
+.hero{padding:33px 0 37px;display:flex;justify-content:space-between;align-items:end;gap:28px}
+h1,h2,h3,p{margin:0}
+h1{font:700 clamp(2.2rem,5vw,4rem)/1.02 Georgia,serif;letter-spacing:-.045em}
+.hero p{max-width:57ch;color:#d3e2ed;margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--blue);border-radius:7px;padding:9px 14px;text-decoration:none;white-space:nowrap;font-weight:650;background:var(--blue);color:white}
+.btn:hover{background:#16446a}
+.btn.light{color:var(--navy);background:var(--gold);border-color:var(--gold)}
+.btn.light:hover{background:#ffe486}
+.btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.secondary:hover{background:#eae8df}
+.btn:disabled{opacity:.42;cursor:default}
+.layout{display:grid;grid-template-columns:244px minmax(0,1fr);gap:30px;padding:32px 0 62px}
+.rail{align-self:start;position:sticky;top:16px}
+.rail h2,.eyebrow{font-size:.75rem;font-weight:750;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.steps{margin:9px 0 20px;display:grid;gap:6px}
+.step-btn{width:100%;border:1px solid transparent;background:transparent;border-radius:8px;padding:9px 10px;display:grid;grid-template-columns:25px 1fr;text-align:left;column-gap:9px;color:var(--ink)}
+.step-btn:hover{background:#efe9d6}
+.step-btn[aria-current="step"]{border-color:#d0b96b;background:#f9edbf;font-weight:700}
+.step-btn small{grid-column:2;font-size:.75rem;color:var(--muted);font-weight:500}
+.num{font-size:.75rem;font-weight:700;display:grid;place-items:center;width:24px;height:24px;border:1px solid #304a5d4d;border-radius:50%;align-self:start;margin-top:2px}
+.timer{padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+.timer-meta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.timer output{font-size:1.5rem;font-weight:750;font-variant-numeric:tabular-nums}
+.timer-actions{display:flex;gap:7px;margin-top:8px}
+.timer-actions .btn{font-size:.83rem;padding:6px 9px}
+article{min-width:0}
+.panel{border:1px solid var(--line);background:var(--card);border-radius:11px;overflow:hidden}
+.step-head{padding:24px 26px;background:#fdf7e2;border-bottom:1px solid var(--line)}
+.step-head h2{font:700 clamp(1.65rem,3vw,2.6rem)/1.1 Georgia,serif;letter-spacing:-.035em;margin:4px 0 8px}
+.step-head p:not(.eyebrow){font-size:.94rem;color:var(--muted)}
+.step-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.step-body>section{padding:22px 25px 26px;min-width:0}
+.step-body>section+section{border-left:1px solid var(--line)}
+h3{font-size:1.07rem;margin:0 0 7px}
+ol{margin:5px 0 0;padding-left:22px}
+li{padding-left:3px;margin-bottom:8px}
+kbd{font:650 .86em/1.25 "Segoe UI",sans-serif;padding:2px 6px;background:#edf2f6;border:1px solid #c4d3df;color:#163650;border-radius:4px}
+.expected{background:#eaf0f6;border-left:3px solid var(--blue);padding:12px 14px;margin-top:15px;border-radius:0 6px 6px 0;font-size:.92rem}
+.coaching{margin-top:13px;color:var(--muted);font-size:.92rem}
+.speech p+p{margin-top:10px}
+.speech p{line-height:1.54}
+details{border-top:1px solid var(--line)}
+summary{cursor:pointer;color:var(--ink);font-weight:700}
+.panel details{padding:12px 25px}
+.panel details[open] summary{margin-bottom:8px}
+.navbuttons{display:flex;gap:10px;justify-content:space-between;margin:16px 0 26px}
+.practice,.recap{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:20px 24px;margin-top:19px}
+.practice p{max-width:70ch;margin-bottom:12px;color:var(--muted)}
+.practice iframe{display:block;width:100%;height:clamp(560px,78vh,890px);border:1px solid var(--line);border-radius:8px;margin-top:15px;background:#f5f5f5}
+.recap details{padding:10px 0}
+.recap p{margin-top:7px}
+.tablescroll{overflow-x:auto;margin:11px 0 12px}
+table{border-collapse:collapse;width:100%;font-size:.94rem;white-space:nowrap}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:8px 9px}
+th{background:#f5edd2}
+.nowrap{white-space:nowrap}
+@media(max-width:970px){.layout{grid-template-columns:191px minmax(0,1fr);gap:17px}.step-body{grid-template-columns:1fr}.step-body>section+section{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:640px){.wrap{width:calc(100% - 28px)}.hero{align-items:start;flex-direction:column;gap:16px}.layout{grid-template-columns:1fr;padding-top:18px}.rail{position:static}.steps{grid-template-columns:1fr 1fr;margin-bottom:10px}.step-btn{padding:6px}.timer{display:flex;align-items:center;justify-content:space-between;gap:10px}.timer-meta{gap:12px}.timer-actions{margin:0}.step-body>section,.step-head{padding:18px}.practice,.recap{padding:16px}.brand{gap:12px}.btn{white-space:normal}}
+@media print{header{color:var(--ink);background:white}.brand,.rail,.hero .btn,.navbuttons,.practice,.recap{display:none}.hero p{color:var(--muted)}.layout{display:block}.panel{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><span>IA EN EL ESTUDIO · EXPOSICIÓN</span><a class="headlink" href="index.html#diapositiva-11" target="_blank" rel="noopener">Ver diapositiva 11 ↗</a></div>
+    <div class="hero">
+      <div><h1>Ensayo de la Persona 3</h1><p>De la diapositiva 11 al cierre, con el guion, los clics y los datos que debes señalar en el tablero.</p></div>
+      <a class="btn light" id="dashboard-main" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener">Abrir tablero ↗</a>
+    </div>
+  </div>
+</header>
+<div class="wrap layout">
+  <aside class="rail">
+    <h2>Tu recorrido · 4 min 45 s</h2>
+    <nav class="steps" id="steps" aria-label="Pasos de la Persona 3"></nav>
+    <div class="timer">
+      <div class="timer-meta"><span>Cronómetro</span><output id="clock" aria-label="Tiempo de ensayo">0:00</output></div>
+      <div class="timer-actions"><button class="btn" id="run" type="button">Iniciar</button><button class="btn secondary" id="reset" type="button">Reiniciar</button></div>
+    </div>
+  </aside>
+  <main id="main">
+    <article class="panel" id="panel" aria-label="Paso de ensayo" tabindex="-1"></article>
+    <div class="navbuttons">
+      <button class="btn secondary" id="previous" type="button">← Paso anterior</button>
+      <button class="btn" id="next" type="button">Siguiente paso →</button>
+    </div>
+    <section class="practice">
+      <h3>Practica con el tablero real</h3>
+      <p>Para ensayar el cambio de pantalla, abre la presentación y pulsa «Abrir tablero» en la diapositiva 12. Puedes dejar esta guía abierta en otra pestaña.</p>
+      <button id="embed" class="btn secondary" type="button" aria-expanded="false" aria-controls="sandbox" hidden>Mostrar tablero local aquí</button>
+      <a class="btn secondary" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener">Tablero público ↗</a>
+      <div id="sandbox" hidden></div>
+    </section>
+    <section class="recap">
+      <h3>Preguntas que te pueden hacer</h3>
+      <details><summary>¿Por qué Streamlit y Altair?</summary><p>Ya teníamos el análisis en Python. Streamlit pone los resultados en una página con secciones, filtros y descargas. Altair dibuja las gráficas y muestra cifras al pasar el cursor.</p></details>
+      <details><summary>¿Dónde se ve qué columnas se limpiaron?</summary><p>En Documentación abre «Cobertura y calidad de los datos». El tablero resume las 18 columnas del formulario de IA y las 9 seleccionadas de bienestar. El notebook y el informe técnico detallan las reglas.</p></details>
+      <details><summary>¿En qué se distinguen las dos búsquedas?</summary><p>GridSearchCV recorre todas las combinaciones de la lista que le dimos. RandomizedSearchCV prueba una selección al azar. Las dos comparan configuraciones por validación cruzada. Para KNN miramos el F1 y guardamos 6 respuestas para la prueba final. Para K-Means miramos la silueta.</p></details>
+      <details><summary>¿El KNN ya sirve para predecir cómo usa IA cualquier estudiante?</summary><p>En la prueba de 6 casos, KNN obtuvo un F1 de 0.889 y la referencia 0.800. En validación pasó lo contrario: el mejor KNN tuvo 0.627 y la referencia 0.713. Las cifras cambian al evaluar otras respuestas. Hacen falta más casos para saber cómo funcionaría fuera de esta muestra.</p></details>
+      <details><summary>¿Qué me dice el número de grupos?</summary><p>La configuración elegida formó 4 grupos de 12, 5, 1 y 1 personas. El tablero junta los grupos pequeños en una barra y evita publicar perfiles individuales. La silueta media de la búsqueda sale de los grupos asignados en validación. La silueta final de 0.110 describe los grupos formados con la muestra completa.</p></details>
+      <details><summary>¿Por qué el porcentaje de Gemini se mantiene al quitar otra barra?</summary><p>Son 15 menciones entre 24 respuestas, es decir, 62.5 %. El filtro cambia cuáles herramientas se ven. La base sigue contando a las 24 personas.</p></details>
+      <details><summary>¿Por qué hay 24 respuestas en una pantalla y 19 en otra?</summary><p>24 personas respondieron sobre IA. De ellas, 19 también contestaron sobre entorno y bienestar. Para comparar traslado y horas de IA hacen falta los dos datos.</p></details>
+      <details><summary>¿Qué significa que R² sea negativo?</summary><p>La predicción tuvo más error cuadrático que usar el promedio de las horas observadas en la prueba. La referencia de la gráfica usa el promedio del entrenamiento. Por eso las dos filas pueden tener R² negativo. Para contar la diferencia en minutos, usa MAE.</p></details>
+      <details><summary>¿Qué diferencia hay entre MAE y RMSE?</summary><p>Las dos se leen en horas. MAE es el error absoluto medio. RMSE da más peso a los errores grandes. Cuando digas «48 minutos», estás convirtiendo el MAE de la regresión.</p></details>
+      <details><summary>¿Esto demuestra algo sobre las calificaciones?</summary><p>Los cuestionarios recogen hábitos y percepciones. Un modelo clasifica el uso que declararon y el otro estima horas de IA. Para estudiar cambios en el desempeño harían falta calificaciones verificadas o tareas comparables, además de más participantes.</p></details>
+    </section>
+  </main>
+</div>
+<script type="application/json" id="original-speech">{"11": ["El análisis ya estaba en Python. Con Streamlit pudimos usar los resultados para hacer una página que funciona en el navegador, con secciones, filtros y descargas. Quien quiera revisar un dato puede hacerlo sin abrir el notebook ni ejecutar el código.", "Las gráficas las hicimos con Altair. Por ejemplo, podemos pasar el cursor sobre una barra para ver la cifra o elegir qué herramientas quedan a la vista. Sirve para revisar varias preguntas con los mismos datos. Al usar un filtro cambiamos lo que se muestra en pantalla. El tablero carga los resultados ya calculados."], "12": ["Voy a abrir el tablero. Primero vemos de dónde salen los indicadores. Luego les muestro dónde quedaron las búsquedas de modelos y cómo leer la prueba de horas."], "Demo A": ["Estamos en Panorama. Arriba se ve el tiempo de uso diario, el uso mixto, el porcentaje que usa varias herramientas y el traslado. Se puede leer el dato rápido y revisar abajo de qué grupo salió.", "En herramientas, cambio a «Porcentaje». Las 15 menciones de Gemini ahora aparecen como 62.5 %. Son las mismas 15 personas entre 24 respuestas. Uso el conteo cuando quiero saber cuántas fueron y el porcentaje cuando quiero decir qué parte del grupo representan."], "Demo B": ["En Uso de IA elijo «Porcentaje» y quito una herramienta para comparar las barras que quedan. Gemini conserva su porcentaje porque la base sigue siendo de 24 respuestas. Es como tapar una fila de una tabla para leer mejor las demás.", "Ya en Entorno y bienestar, la base cambia a 19. Son quienes respondieron los dos formularios. Si alguien les señala dos cifras distintas, miren primero qué grupo se usó para calcular cada una."], "Demo C": ["En Modelos abro Clasificación y despliego la comparación de las búsquedas. Cada fila dice si se probaron todas las combinaciones elegidas o solo una selección, qué configuración quedó primero y qué F1 logró en validación.", "La prueba guardada se muestra aparte. Así podemos ver cómo le fue al KNN seleccionado y cómo le fue a la regla de decir siempre la categoría más común. Fíjense en el número de casos. Una diferencia aquí merece comprobarse con más respuestas."], "Demo D": ["Ahora cambio a Agrupación exploratoria. Aquí ya no hay una respuesta correcta que adivinar. En la tabla aparece el resultado de cada búsqueda. La silueta resume qué tan separados están los grupos. La gráfica de tamaños ayuda a ponerle contexto a esa puntuación. Si un grupo queda muy chico, en el tablero se muestra sin un perfil individual. Con 19 respuestas esto nos sirve para explorar parecidos."], "Demo E": ["En Regresión, las dos filas se calcularon con las mismas 6 respuestas guardadas. Al cambiar de R² a MAE, las barras muestran el error medio en horas. Son unos 48 minutos para la regresión y 38 para el promedio de entrenamiento. Para leer este gráfico, busquen la barra más corta."], "Demo F": ["En Documentación pueden descargar los dos informes. El técnico explica qué hizo el código y el de negocio reúne los indicadores y lo que podemos decir con ellos. Lo más común fue combinar ayuda para aprender con ganas de avanzar. Para saber si eso cambia las calificaciones harían falta otras mediciones. Gracias. ¿Tienen preguntas?"]}</script>
+<script>
+const localDashboard = 'http://localhost:8501/';
+const isLocal = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+const dashboardLink = document.querySelector('#dashboard-main');
+const embed = document.querySelector('#embed');
+if (isLocal) {
+  dashboardLink.href = localDashboard;
+  dashboardLink.textContent = 'Abrir tablero local ↗';
+  embed.hidden = false;
+}
+
+const spoken = JSON.parse(document.querySelector('#original-speech').textContent);
+const steps = [
+  {title:'Por qué elegimos Streamlit', at:'10:15–11:00', place:'Diapositiva 11', text:spoken['11'],
+   clicks:['Entra cuando termine la Persona 2. Avanza a la <kbd>diapositiva 11</kbd>.','Señala primero el recuadro de <kbd>Streamlit</kbd> y después el de <kbd>Altair</kbd>.','Avanza cerca de 11:00 al terminar la última frase.'],
+   see:'Dos recuadros con las herramientas que usamos. Streamlit organiza la página y Altair dibuja las gráficas.',
+   tip:'Ten listo el ejemplo de la barra: puedes elegir qué herramientas ver y pasar el cursor para que aparezca la cifra.'},
+  {title:'Veamos el tablero', at:'11:00–11:15', place:'Diapositiva 12', text:spoken['12'],
+   clicks:['Avanza una vez desde la diapositiva 11.','Di la frase y pulsa <kbd>Abrir tablero</kbd>.','Cuando cargue, ubica <kbd>Panorama</kbd> en el menú izquierdo.'],
+   see:'El botón abre el tablero público en la misma pestaña. La primera vista se titula «Así usan la IA los estudiantes».',
+   tip:'Puedes ensayar el tablero desde el botón de arriba de esta guía. Antes de exponer, abre el enlace público para que Streamlit tenga tiempo de cargar.'},
+  {title:'Panorama', at:'11:15–12:00', place:'Tablero · menú izquierdo', text:spoken['Demo A'],
+   clicks:['Señala las tarjetas de arriba: <kbd>Tiempo diario (mediana)</kbd>, uso mixto, uso de más de una herramienta y <kbd>Traslado (mediana)</kbd>.','Baja a <kbd>Las herramientas más mencionadas</kbd>.','Pulsa <kbd>Porcentaje</kbd> encima de las barras y señala <kbd>Gemini</kbd>.'],
+   see:'1.5 h de mediana diaria, 54.2 % de uso mixto y 54.2 % con dos herramientas o más. La mediana de traslado es de 60 min. Las 15 menciones de Gemini pasan a mostrarse como 62.5 %.',
+   tip:'La división es 15 ÷ 24. Cada persona podía mencionar varias herramientas. Por eso, si sumas todos los porcentajes de las barras pueden pasar de 100 %.'},
+  {title:'Uso de IA', at:'12:00–12:20 aprox.', place:'Tablero · menú izquierdo', text:spoken['Demo B'].slice(0,1),
+   clicks:['Entra en <kbd>Uso de IA</kbd>.','En <kbd>Herramientas de IA</kbd>, abre <kbd>Mostrar</kbd> y elige <kbd>Porcentaje</kbd>.','En <kbd>Herramientas</kbd>, pulsa la × de una herramienta distinta a <kbd>Gemini</kbd>.'],
+   see:'Desaparece una barra y Gemini conserva 62.5 %. El selector de porcentaje de esta pantalla es independiente del de Panorama.',
+   tip:'Puedes pensar en tapar una fila de una tabla para leer mejor las demás. El número de personas que respondieron sigue igual.'},
+  {title:'Entorno y bienestar', at:'12:20–12:40 aprox.', place:'Tablero · menú izquierdo', text:spoken['Demo B'].slice(1),
+   clicks:['Abre <kbd>Entorno y bienestar</kbd>.','Señala la tarjeta <kbd>Respondieron ambas encuestas</kbd>.','Baja a <kbd>Traslado y horas de IA</kbd> si quieres mostrar el cruce.'],
+   see:'19 de 24 contestaron ambos formularios. La mediana de traslado fue de 60 minutos.',
+   tip:'La comparación de traslado y horas de IA usa esos 19 pares. Vimos poca evidencia de una relación clara en las respuestas disponibles.'},
+  {title:'Clasificación', at:'12:40–13:25', place:'Tablero · Modelos → Clasificación', text:spoken['Demo C'],
+   clicks:['Entra a <kbd>Modelos</kbd> y elige <kbd>Clasificación</kbd>.','Abre <kbd>Ver GridSearchCV y RandomizedSearchCV</kbd> y señala las dos filas.','Baja más allá de <kbd>Comparación con configuraciones fijas</kbd> hasta <kbd>Prueba reservada</kbd>. En la tabla de al lado, señala la fila F1.'],
+   see:'La tabla describe las configuraciones y el F1 de validación. Para la prueba reservada, el F1 de KNN es 0.889, frente a 0.800 de la referencia.',
+   tip:'En validación, el mejor KNN tuvo un F1 de 0.627 y la referencia 0.713. La prueba final usó otras 6 respuestas. Explica por qué ambos resultados tienen sentido sin sacar conclusiones firmes con tan pocos casos.'},
+  {title:'Agrupación exploratoria', at:'13:25–14:05', place:'Tablero · Modelos → Agrupación exploratoria', text:spoken['Demo D'],
+   clicks:['En <kbd>Modelos</kbd>, cambia a <kbd>Agrupación exploratoria</kbd>.','Abre <kbd>Ver GridSearchCV y RandomizedSearchCV</kbd>. Señala la silueta de validación y el número de grupos de ambas filas.','Muestra <kbd>Cuántas personas hay en cada grupo</kbd>.'],
+   see:'La configuración elegida formó 4 grupos de 12, 5, 1 y 1 personas. La gráfica reúne los grupos muy pequeños en una sola barra.',
+   tip:'La silueta resume separación. Mira también cuántas personas quedaron en cada grupo antes de hablar de perfiles. Los grupos pequeños se muestran juntos para proteger las respuestas individuales.'},
+  {title:'Regresión de horas', at:'14:05–14:35', place:'Tablero · Modelos → Regresión (R²)', text:spoken['Demo E'],
+   clicks:['Cambia a <kbd>Regresión (R²)</kbd>.','Ubica <kbd>Comparación en las mismas respuestas de prueba</kbd>.','En el selector de la gráfica elige <kbd>MAE (horas)</kbd> y señala las dos barras.'],
+   see:'R² es −0.245 para la regresión y −0.064 para la referencia. Las barras de MAE muestran 0.808 y 0.634 horas. En MAE, una barra más corta indica menor error medio.',
+   tip:'La referencia predice el promedio de las 18 respuestas de entrenamiento. Los mismos 6 casos se reservaron para probar ambos modelos. 0.808 h equivalen a unos 48 min y 0.634 h a unos 38 min.',
+   table:true, extra:'Si preguntan por las entradas de la regresión, menciona el semestre en que empezó el uso de IA y la cantidad de herramientas. La predicción se expresa en horas de IA por día.'},
+  {title:'Documentación y cierre', at:'14:35–15:00', place:'Tablero · menú izquierdo', text:spoken['Demo F'],
+   clicks:['Abre <kbd>Documentación</kbd>.','Señala <kbd>Descargar informe técnico</kbd> y <kbd>Descargar informe de negocio</kbd>.','Di la conclusión y deja en pantalla los PDF para las preguntas.'],
+   see:'Dos PDF. El informe técnico reúne limpieza y evaluación. El de negocio reúne indicadores, hallazgos y límites.',
+   tip:'Recuerda el dato central: 13 de 24 describieron un uso mixto. Si te preguntan cómo comprobamos la limpieza, abre <kbd>Cobertura y calidad de los datos</kbd> en esta misma pantalla.'}
+];
+const metricTable = '<div class="tablescroll"><table><thead><tr><th>Modelo</th><th>R²</th><th>MAE</th><th>RMSE</th></tr></thead><tbody><tr><td>Regresión lineal</td><td>−0.245</td><td>0.808 h</td><td>1.039 h</td></tr><tr><td>Referencia (media)</td><td>−0.064</td><td>0.634 h</td><td>0.961 h</td></tr></tbody></table></div>';
+let active = 0;
+const panel = document.querySelector('#panel');
+const list = document.querySelector('#steps');
+const prev = document.querySelector('#previous');
+const next = document.querySelector('#next');
+
+function display(index, fromClick = false) {
+  active = Math.max(0, Math.min(steps.length - 1, index));
+  const step = steps[active];
+  list.replaceChildren(...steps.map((s, i) => {
+    const button = document.createElement('button');
+    button.className = 'step-btn';
+    button.type = 'button';
+    if (i === active) button.setAttribute('aria-current', 'step');
+    button.innerHTML = '<span class="num">' + (i + 1) + '</span><span>' + s.title + '</span><small>' + s.at + '</small>';
+    button.addEventListener('click', () => display(i, true));
+    return button;
+  }));
+  panel.innerHTML = '<div class="step-head"><p class="eyebrow">' + step.place + '</p><h2>' + step.title + '</h2><p>' + step.at + ' · Paso ' + (active + 1) + ' de ' + steps.length + '</p></div>'
+    + '<div class="step-body"><section><h3>Dónde ir</h3><ol>' + step.clicks.map(line => '<li>' + line + '</li>').join('')
+    + '</ol><p class="expected"><strong>Qué debe aparecer</strong><br>' + step.see + '</p>' + (step.table ? metricTable : '') + '</section>'
+    + '<section class="speech"><h3>Qué dices</h3></section></div><details><summary>Para estudiar este paso</summary><p>' + step.tip + '</p>'
+    + (step.extra ? '<p class="coaching">' + step.extra + '</p>' : '') + '</details>';
+  const speech = panel.querySelector('.speech');
+  for (const line of step.text) {
+    const paragraph = document.createElement('p');
+    paragraph.textContent = line;
+    speech.append(paragraph);
+  }
+  prev.disabled = active === 0;
+  next.disabled = active === steps.length - 1;
+  if (fromClick) {
+    history.replaceState(null, '', '#paso-' + (active + 1));
+    panel.focus({preventScroll: true});
+    panel.scrollIntoView({block: 'start'});
+  }
+}
+function readHash() {
+  const match = /^#paso-(\d+)$/.exec(location.hash);
+  display(match ? Number(match[1]) - 1 : 0);
+}
+prev.addEventListener('click', () => display(active - 1, true));
+next.addEventListener('click', () => display(active + 1, true));
+window.addEventListener('hashchange', readHash);
+readHash();
+
+const clock = document.querySelector('#clock');
+const run = document.querySelector('#run');
+let clockStart = null, elapsed = 0;
+function drawClock() {
+  const seconds = Math.floor((elapsed + (clockStart === null ? 0 : performance.now() - clockStart)) / 1000);
+  clock.value = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+}
+run.addEventListener('click', () => {
+  if (clockStart === null) { clockStart = performance.now(); run.textContent = 'Pausar'; }
+  else { elapsed += performance.now() - clockStart; clockStart = null; run.textContent = 'Continuar'; }
+  drawClock();
+});
+document.querySelector('#reset').addEventListener('click', () => {
+  elapsed = 0; clockStart = null; run.textContent = 'Iniciar'; drawClock();
+});
+setInterval(drawClock, 250);
+
+const sandbox = document.querySelector('#sandbox');
+embed.addEventListener('click', () => {
+  if (!sandbox.firstElementChild) {
+    const frame = document.createElement('iframe');
+    frame.title = 'Tablero de IA en contexto para practicar';
+    frame.src = localDashboard;
+    sandbox.append(frame);
+  }
+  sandbox.hidden = !sandbox.hidden;
+  embed.setAttribute('aria-expanded', String(!sandbox.hidden));
+  embed.textContent = sandbox.hidden ? 'Mostrar tablero local aquí' : 'Ocultar tablero';
+});
+</script>
+</body>
+</html>

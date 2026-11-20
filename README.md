@@ -4,7 +4,7 @@
 
 **[Ver tablero interactivo](https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/)**
 
-[Diapositivas de la exposición](presentacion/index.html) · [Guion en PDF](presentacion/guion.pdf)
+[Diapositivas de la exposición](presentacion/index.html) · [Guion en PDF](presentacion/guion.pdf) · [Guía de ensayo de la persona 3](presentacion/ensayo-persona-3.html)
 
 Este proyecto estudia cómo un grupo de estudiantes incorpora herramientas de inteligencia artificial a sus actividades académicas y cómo describe su entorno universitario. Reúne el análisis de dos cuestionarios, un tablero interactivo y los informes técnico y de negocio.
 
@@ -31,24 +31,22 @@ Los 19 registros de bienestar se emparejaron con su respuesta sobre IA. Las cinc
 | --- | --- |
 | Python y Jupyter Notebook | Desarrollo y presentación del análisis |
 | pandas y NumPy | Limpieza, transformación y resumen de los datos |
-| scikit-learn | TF-IDF, imputación, escalamiento, PCA, clasificación y agrupamiento |
+| `re`, `unicodedata` y `difflib` | Expresiones regulares, normalización de texto y similitud de nombres de herramientas |
+| scikit-learn | K-Means, KNN, búsquedas de hiperparámetros, TF-IDF, imputación, escalamiento y PCA |
 | SciPy | Correlación de Spearman y análisis estadístico |
 | Matplotlib y WordCloud | Figuras del estudio y exploración de términos |
 | Streamlit y Altair | Tablero interactivo y visualización de resultados |
 | ReportLab y pypdf | Elaboración de los informes, conservando las portadas originales |
 | unittest y Streamlit AppTest | Comprobación del análisis y del tablero |
 
-Se compararon regresión logística, SVM, Random Forest y KNN con una referencia que predice siempre la clase mayoritaria. Un segundo ejercicio utiliza regresión lineal para estimar horas de uso de IA y la compara con el promedio de entrenamiento. También se exploraron agrupaciones mediante K-Means y clustering jerárquico.
-
 ## Desarrollo del análisis
 
-1. **Preparación de las fuentes.** Validación de columnas y registros únicos, cruce de cuestionarios y normalización de horas, traslados y nombres de herramientas.
-2. **Análisis descriptivo.** Revisión de frecuencias, porcentajes, medianas y distribuciones, manteniendo la base de cada encuesta.
-3. **Análisis de texto.** Extracción de términos con TF-IDF y cálculo de polaridad léxica con tratamiento de negaciones. Este indicador describe el lenguaje y no constituye una escala clínica o académica.
-4. **Clasificación supervisada.** Distinción entre uso declarado mixto y uso exclusivo como guía o atajo. La pregunta que define la etiqueta se excluyó de los predictores. Se usaron 16 casos de entrenamiento, validación cruzada de cinco pliegues y seis casos reservados para prueba.
-5. **Regresión del tiempo de uso.** Estimación de horas diarias de IA a partir del semestre de inicio y la cantidad de herramientas. Se usaron 18 casos de entrenamiento, cinco pliegues de validación y seis casos reservados para prueba. La evaluación incluye R², MAE y RMSE.
-6. **Exploración del entorno.** Correlaciones y agrupamiento con las 19 observaciones reales de bienestar, sin completar encuestas faltantes con datos inventados.
-7. **Presentación.** Integración de los resultados en el notebook, las figuras, el tablero y los dos informes.
+1. **Limpieza en Python.** El flujo parte de las exportaciones originales. Trata los 18 campos de IA y las variables de bienestar que incorpora al análisis. Aplica validación de tipos y formatos, expresiones regulares, unificación de unidades y similitud de cadenas para variantes de herramientas. El notebook muestra las reglas y los conteos por campo.
+2. **EDA y KPIs.** Se revisan distribuciones, frecuencias, medianas y correlaciones. Los porcentajes indican qué grupo de respuestas se usó. TF-IDF y la polaridad léxica resumen el lenguaje de las encuestas.
+3. **Aprendizaje no supervisado.** K-Means explora agrupaciones con los casos que respondieron ambas encuestas. `GridSearchCV` y `RandomizedSearchCV` comparan configuraciones mediante la silueta en validación. Las agrupaciones se describen como patrones exploratorios de esta muestra.
+4. **Aprendizaje supervisado.** KNN intenta distinguir el uso mixto del exclusivo. Se prueban `GridSearchCV` y `RandomizedSearchCV` con F1 en los pliegues del entrenamiento. El modelo ajustado se evalúa en los seis casos reservados junto a la referencia mayoritaria. La comparación de clasificadores con parámetros fijos se conserva como exploración aparte.
+5. **Regresión complementaria.** Se evalúa si el semestre de inicio y la cantidad de herramientas ayudan a estimar las horas diarias declaradas. Se usan R², MAE y RMSE y se compara contra el promedio de entrenamiento.
+6. **Tablero analítico.** Streamlit reúne los KPIs, las gráficas, los resultados de los modelos y ambos informes.
 
 ## Principales resultados
 
@@ -64,7 +62,12 @@ Se compararon regresión logística, SVM, Random Forest y KNN con una referencia
 
 Las herramientas admiten varias menciones por persona, por lo que sus porcentajes no deben sumarse como categorías excluyentes.
 
-No se observó una relación clara entre el tiempo de traslado y las horas de IA en esta muestra (Spearman: rho = 0.137; p = 0.575; n = 19). En la clasificación, la referencia mayoritaria obtuvo un F1 medio de 0.713 en validación, por encima de la regresión logística (0.627). El ejercicio no ofrece evidencia suficiente para realizar predicciones individuales.
+La relación entre el tiempo de traslado y las horas de IA fue débil en esta muestra (Spearman ρ = 0.137, p = 0.575, n = 19).
+
+- **K-Means.** Las dos búsquedas eligieron cuatro grupos. La silueta media en validación fue 0.196. En la muestra completa quedaron grupos de 12, 5, 1 y 1 personas, con silueta de 0.110. La separación es baja y dos grupos son casos aislados.
+- **KNN.** La mejor configuración obtuvo F1 medio de 0.627 en validación, frente a 0.713 de la referencia mayoritaria. En la prueba, KNN acertó cinco de seis casos y la referencia cuatro. Una diferencia de un acierto en una prueba tan pequeña requiere confirmación con más datos.
+
+Las configuraciones elegidas y sus resultados se pueden consultar en el notebook, el tablero y el [CSV de búsquedas](resultados/ajuste_modelos.csv).
 
 ### Regresión: ¿podemos estimar las horas de IA?
 
@@ -88,7 +91,7 @@ El tablero organiza la consulta en cinco apartados:
 - **Panorama:** tamaño de la muestra, indicadores generales y modalidades de uso.
 - **Uso de IA:** herramientas, inicio de uso y percepciones sobre el reemplazo profesional.
 - **Entorno y bienestar:** traslados, lenguaje de las respuestas y asociaciones exploratorias.
-- **Modelos:** clasificación, regresión con R² y exploración de agrupaciones, cada una en su propia pestaña.
+- **Modelos:** clasificación y agrupación con sus búsquedas de parámetros, además de la regresión complementaria con R².
 - **Documentación:** consulta y descarga de los informes del proyecto.
 
 Los controles permiten explorar los agregados disponibles. Los porcentajes de herramientas conservan como denominador las 24 respuestas; seleccionar una herramienta no reconstruye cruces individuales con bienestar.
@@ -97,25 +100,15 @@ Los controles permiten explorar los agregados disponibles. Los porcentajes de he
 
 | Archivo o carpeta | Contenido |
 | --- | --- |
-| [Notebook del análisis](Analisis_IA_Desempeno_MAC_Cuestionarios.ipynb) | Desarrollo del estudio con resultados y figuras |
-| [analisis.py](analisis.py) | Preparación de datos, análisis de texto y evaluación de modelos |
-| [dashboard.py](dashboard.py) y [dashboard_datos.py](dashboard_datos.py) | Aplicación y lectura de resultados agregados |
-| [resultados/](resultados/) | Resumen JSON, tablas CSV y gráficas |
-| [visualizaciones.py](visualizaciones.py) | Generación de figuras |
-| [reportes.py](reportes.py) | Generación de los informes PDF |
-| [verificar_notebook.py](verificar_notebook.py) | Ejecución y comprobación del notebook |
-| [tests/](tests/) | Pruebas del análisis y del tablero |
-| Archivos `requirements*.txt` | Dependencias de la aplicación, el análisis y la validación |
+| **Código Python** | [Notebook descargable](Analisis_IA_Desempeno_MAC_Cuestionarios.ipynb), [limpieza por campo](limpieza_encuestas.py), [análisis y modelos](analisis.py), [figuras](visualizaciones.py) y [generación de informes](reportes.py) |
+| **Dependencias versionadas** | [Análisis y reportes](requirements-analysis.txt), [tablero](requirements.txt) y [entorno completo con Jupyter y pruebas](requirements-dev.txt) |
+| **Tablero analítico** | [Consulta en Streamlit](https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/), [código de la aplicación](dashboard.py) y [lectura de agregados](dashboard_datos.py) |
+| **Documento técnico** | [Consultar o descargar el PDF](docs/DOCUMENTACION_TECNICA.pdf) |
+| **Documento de negocio** | [Consultar o descargar el PDF](docs/DOCUMENTACION_NEGOCIO.pdf) |
+| **Resultados y evidencia** | [Tablas y figuras](resultados/), [metodología](docs/METODOLOGIA.md), [guía de interpretación](docs/INTERPRETACION.md) y [verificación](tests/VERIFICACION.md) |
+| **Exposición** | [Diapositivas, guion y guía de práctica](presentacion/) |
 
-La documentación del proyecto se encuentra en:
-
-- [Informe técnico](docs/DOCUMENTACION_TECNICA.pdf).
-- [Informe de negocio](docs/DOCUMENTACION_NEGOCIO.pdf).
-- [Metodología y alcance](docs/METODOLOGIA.md).
-- [Guía para interpretar los resultados](docs/INTERPRETACION.md).
-- [Verificación de la entrega](tests/VERIFICACION.md).
-
-Los dos PDF son los informes definitivos del proyecto y conservan las portadas y el estilo de los documentos de referencia. Toda la documentación se encuentra directamente en [docs/](docs/), con un índice para consultarla. El notebook, el tablero y los informes comparten los resultados de `resultados/resumen.json`.
+Los dos PDF incluyen los nombres completos del equipo en sus portadas. El notebook se incluye como archivo `.ipynb` con salidas visibles. Usa las encuestas privadas para recalcular y consulta los mismos agregados que el tablero y los informes en [`resultados/resumen.json`](resultados/resumen.json).
 
 ## Alcance y conclusiones
 

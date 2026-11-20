@@ -10,7 +10,13 @@ Gemini tiene 15 menciones entre las 24 respuestas, y 13 personas mencionan al me
 
 El 54.2 % de uso híbrido describe respuestas que combinan aprender con agilizar tareas. La categoría expresa el propósito declarado, sin comprobar por sí sola la calidad del aprendizaje.
 
-## Clasificación: F1 y accuracy
+## Qué se prueba al ajustar un modelo
+
+`GridSearchCV` recorre todas las combinaciones de una lista. `RandomizedSearchCV` toma una selección del espacio que definimos. Es parecido a probar recetas con distintas cantidades de un ingrediente: podemos seguir todas las combinaciones de una lista corta o elegir algunas de una lista más larga. En el notebook aparecen las configuraciones revisadas, los parámetros elegidos y sus puntajes de validación.
+
+En K-Means se compara la separación de grupos de los casos apartados en cada pliegue. En KNN se compara qué tan bien se reconoció la modalidad mixta. Los dos puntajes responden a tareas distintas.
+
+## Qué tan bien se clasifica la modalidad de uso
 
 La clasificación intenta distinguir uso mixto de uso exclusivo como guía o atajo. La clase positiva es la modalidad mixta. La pregunta que define la categoría se excluye de los predictores.
 
@@ -19,9 +25,11 @@ La clasificación intenta distinguir uso mixto de uso exclusivo como guía o ata
 - **Recall** indica cuántos casos mixtos logra recuperar el modelo.
 - **F1** combina precisión y recall para valorar ambas en una sola cifra.
 
-La regresión logística es un clasificador a pesar de su nombre. Su F1 medio de validación fue 0.627, frente a 0.713 de predecir siempre la clase mayoritaria. El resultado de la prueba puede parecer mejor, pero solo contiene seis casos. Un acierto cambia accuracy en 16.7 puntos porcentuales. Por eso conviene leer la prueba junto con la validación y la referencia.
+KNN clasifica cada respuesta según cómo se etiquetaron sus casos de entrenamiento más cercanos. Las dos búsquedas ayudan a elegir esa configuración sin usar los seis casos reservados. Para leer la prueba, se compara KNN ajustado con la referencia que siempre elige la modalidad más frecuente. Con seis casos, un acierto cambia accuracy en 16.7 puntos porcentuales. El informe técnico distingue este resultado de la comparación aparte entre clasificadores de parámetros fijos.
 
-## Regresión: R², MAE y RMSE
+En validación, la cuadrícula obtuvo F1 medio de 0.627 y la búsqueda aleatoria 0.560. La referencia mayoritaria obtuvo 0.713. En los seis casos reservados, el KNN elegido acertó cinco y obtuvo F1 de 0.889. La referencia acertó cuatro y obtuvo F1 de 0.800. La ventaja en prueba equivale a un acierto y queda pendiente comprobar si se repite en una muestra mayor.
+
+## Regresión complementaria de horas de uso
 
 La regresión lineal responde otra pregunta: si el semestre de inicio y la cantidad de herramientas ayudan a estimar las horas diarias de IA. Se evalúa con 24 casos completos, distribuidos en 18 de entrenamiento y seis de prueba. Esta partición es independiente de la clasificación.
 
@@ -46,7 +54,7 @@ Los dos predictores no mejoraron esas métricas de prueba frente al promedio. Ha
 
 ## Qué aporta la validación cruzada
 
-Los modelos se evalúan en cinco pliegues del conjunto de entrenamiento. Cada pliegue aparta una parte para validar y aprende sus transformaciones con el resto. La prueba final queda fuera de ese proceso.
+Para clasificación y regresión, cada pliegue aparta una parte del conjunto de entrenamiento para validar y usa el resto para aprender las transformaciones del modelo. Los casos reservados para la prueba final quedan fuera de ese proceso.
 
 En regresión, cada pliegue evalúa tres o cuatro respuestas. Si las horas de un pliegue son muy parecidas, incluso un error pequeño puede producir un R² muy negativo. El promedio de R² por pliegue no equivale a calcular un único R² sobre todas las predicciones reunidas. Los pliegues con horas constantes conservan R² nulo y se informa cuántos valores definidos entran al promedio.
 
@@ -58,8 +66,10 @@ La correlación de Spearman entre traslado y horas de IA fue 0.137, con p = 0.57
 
 La polaridad resume palabras y expresiones reconocidas en las respuestas. Un cero puede indicar equilibrio entre señales o falta de vocabulario coincidente. No debe interpretarse como bienestar neutral. El indicador no es una escala clínica ni una medición del aprendizaje.
 
-K-Means separó 19 casos en grupos de 18 y uno. La puntuación silhouette de 0.360 fue la mejor entre los valores de k ensayados, pero no demuestra que existan perfiles estables. Se omiten descripciones de grupos o complementos menores de tres personas para proteger las respuestas individuales.
+K-Means agrupó los 19 casos con entorno observado. La silueta ayuda a leer qué tan juntos quedan los casos de un grupo y qué tan separados quedan de los demás. Si un pliegue de búsqueda no produce etiquetas suficientes para calcularla, la comparación usa una penalización de −1 y lo registra aparte. La silueta del ajuste final se calcula en la muestra completa y describe esa agrupación. Los tamaños de grupo ayudan a ver cuándo pocos casos explican buena parte de la separación. Se omiten descripciones de grupos o complementos menores de tres personas para proteger las respuestas individuales.
+
+Las dos búsquedas coincidieron en cuatro grupos con una silueta media de 0.196 en validación y tres pliegues válidos. Tras el ajuste con los 19 casos quedaron grupos de 12, 5, 1 y 1 personas. La silueta de ese ajuste fue 0.110. La cercanía a cero y los casos aislados indican que los grupos requieren más evidencia antes de interpretarlos como perfiles del alumnado.
 
 ## Qué conclusión sí puede sostenerse
 
-El estudio describe hábitos y percepciones, y muestra cómo se comportan varias técnicas con pocos datos. En esta ejecución, los modelos predictivos no superaron sus referencias en las métricas principales señaladas: F1 de validación para clasificación y MAE de prueba para regresión. Para estudiar efectos sobre el desempeño académico se necesitan calificaciones numéricas independientes, más participantes y seguimiento en el tiempo.
+El estudio describe hábitos y percepciones, y muestra cómo se comportan varias técnicas con pocos datos. El tamaño de la muestra limita cuánto podemos esperar que se repitan las comparaciones de clasificación, regresión y agrupación. Para estudiar efectos sobre el desempeño académico se necesitan calificaciones numéricas independientes, más participantes y seguimiento en el tiempo.

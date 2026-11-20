@@ -1,0 +1,5 @@
+﻿modelo,metrica,pliegues,metodo,configuraciones,parametros,media,desviacion,pliegues_validos
+K-Means,Silueta,3,GridSearchCV,16,"{""modelo__init"": ""k-means++"", ""modelo__n_clusters"": 4, ""modelo__n_init"": 20}",0.1962813523921176,0.1697028580002597,3
+K-Means,Silueta,3,RandomizedSearchCV,8,"{""modelo__n_init"": 20, ""modelo__n_clusters"": 4, ""modelo__init"": ""k-means++""}",0.1962813523921176,0.1697028580002597,3
+KNN,F1,5,GridSearchCV,16,"{""modelo__n_neighbors"": 3, ""modelo__p"": 1, ""modelo__weights"": ""uniform""}",0.6266666666666667,0.11430952132988165,5
+KNN,F1,5,RandomizedSearchCV,8,"{""modelo__weights"": ""distance"", ""modelo__p"": 1, ""modelo__n_neighbors"": 3}",0.5599999999999999,0.28472208672083493,5

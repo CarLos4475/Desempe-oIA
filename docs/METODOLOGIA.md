@@ -2,11 +2,19 @@
 
 El análisis reúne 24 respuestas sobre uso de IA y 19 sobre entorno universitario. Las claves se usan en memoria para validar y emparejar los registros de uno a uno. Los archivos públicos contienen solo resultados agregados.
 
-## Preparación de los datos
+## Limpieza en Python
 
-Se validan las columnas y las claves únicas antes del cruce. Se normalizan horas, edades, traslados y variantes de nombres de herramientas. Las duraciones expresadas en rangos se aproximan y las unidades se convierten a horas o minutos según corresponda.
+Python lee el XLSX y el CSV directamente. La preparación valida los encabezados y el orden de las preguntas, convierte la marca temporal, normaliza las claves y comprueba que la unión sea de uno a uno. Los archivos originales se conservan byte por byte. Las huellas SHA-256 registradas en `resultados/resumen.json` ayudan a identificar las fuentes de esta ejecución.
 
-Las respuestas abiertas ausentes permanecen vacías. Las cinco personas sin encuesta de bienestar conservan esos datos como faltantes. Para describir entorno, calcular asociaciones y explorar grupos se usan las 19 observaciones reales.
+Se aplica un tratamiento a los 18 campos del formulario de IA, incluida la pregunta opcional de otros usos. La limpieza de bienestar cubre la clave de cruce y las variables incorporadas al estudio. El notebook enumera las columnas cubiertas, las que quedan fuera del alcance y, por cada campo, la regla aplicada y los conteos de ausencias y modificaciones.
+
+Las expresiones regulares permiten extraer unidades y variantes como «Chat GPT». Después de los patrones y alias se aplica similitud de cadenas con un criterio conservador para los nombres de herramientas. Un alias de una herramienta ya reconocida no aumenta su frecuencia. Las duraciones en rangos se aproximan y se convierten a horas o minutos según corresponda. El texto abierto conserva su contenido y una respuesta en blanco permanece como ausente.
+
+Las cinco personas sin encuesta de bienestar conservan esos datos como faltantes. El EDA, las asociaciones con el entorno y el agrupamiento usan las 19 observaciones disponibles de bienestar. No se exportan claves, marcas temporales ni respuestas abiertas.
+
+## Análisis exploratorio e indicadores
+
+Se describen distribuciones, medianas, frecuencias, valores extremos y correlaciones de Spearman. El tiempo típico de IA y de traslado se resume con medianas y sus respectivos tamaños de muestra. La proporción de uso mixto incluye en el denominador a las 24 respuestas del formulario de IA. La diversidad de herramientas cuenta cuántas personas mencionaron al menos dos. Las menciones individuales de herramientas son multirrespuesta. La documentación de negocio explica el significado de cada indicador y los posibles usos de seguimiento.
 
 ## Análisis del lenguaje
 
@@ -20,11 +28,13 @@ La etiqueta distingue uso mixto de uso exclusivo como guía o atajo. Se excluyen
 
 Los 22 casos etiquetables se dividen de forma estratificada en 16 para entrenamiento y seis para prueba, con semilla 42. La validación cruzada de cinco pliegues se realiza solo sobre entrenamiento. En cada pliegue se vuelven a ajustar escala, imputación KNN, TF-IDF y PCA, evitando aprender de los casos que se van a evaluar.
 
-Se comparan regresión logística, SVM, Random Forest y KNN con una referencia que predice siempre la clase mayoritaria. El candidato entre los cuatro clasificadores se elige por F1 medio de validación, con desempate por accuracy y menor dispersión. La prueba se consulta después de esa elección.
+El ajuste principal utiliza `KNeighborsClassifier`. `GridSearchCV` recorre una cuadrícula de configuraciones y `RandomizedSearchCV` revisa una selección reproducible del espacio de búsqueda. Ambas usan los mismos pliegues estratificados de entrenamiento y seleccionan por F1 medio. El notebook informa cuántas configuraciones se evaluaron, cuáles quedaron arriba y cómo cambiaron sus resultados entre pliegues. La configuración de KNN seleccionada se evalúa en los casos reservados junto a la referencia mayoritaria.
+
+En una comparación exploratoria aparte se evalúan regresión logística, SVM, Random Forest y un KNN de parámetros fijos. Entre ellos se elige un candidato por F1 medio de validación, con desempate por accuracy y menor dispersión. El KNN ajustado de la actividad principal tiene su propio resultado. Los casos de prueba se consultan después de esas decisiones.
 
 Se reportan accuracy, precisión, recall, F1 y matriz de confusión. Con seis casos de prueba, un acierto cambia accuracy en 16.7 puntos porcentuales. La tarea evalúa categorías declaradas de uso, sin medir aprendizaje efectivo.
 
-## Regresión de horas de uso
+## Regresión complementaria de horas de uso
 
 El objetivo numérico es `horas_ia_dia`. Los predictores son `semestre_inicio` y `total_herramientas`; el objetivo no se utiliza como entrada. Se conservan casos completos con valores finitos y horas no negativas. En esta ejecución se utilizaron los 24 casos y no hubo exclusiones.
 
@@ -40,10 +50,12 @@ R² puede ser negativo y no se recorta. Su referencia matemática usa la media d
 
 Se exploran correlaciones de Spearman sin ajuste por comparaciones múltiples. Una asociación no prueba causalidad, y un valor p alto tampoco prueba que la relación no exista.
 
-K-Means y clustering jerárquico usan variables estandarizadas de los 19 registros con entorno observado. El mejor silhouette se elige entre k = 2, 3, 4 y 5. La proyección PCA ayuda a resumir variación, pero no demuestra que los grupos sean estables. Se omiten perfiles si un grupo o su complemento tienen menos de tres personas.
+K-Means usa seis variables estandarizadas de los 19 registros con entorno observado. `GridSearchCV` y `RandomizedSearchCV` buscan configuraciones con silueta de validación. Cada pliegue entrena el escalador y los centroides, asigna las observaciones de validación a esos centroides y calcula la silueta donde las etiquetas lo permiten. Un pliegue sin una silueta definida aporta una penalización de −1 para la búsqueda. Se informa cuántos pliegues permitieron calcularla para distinguir ese caso de una silueta medida.
+
+La silueta de la solución final se calcula en la muestra completa para describirla. El recorrido de k de 2 a 5 en esa misma muestra y el agrupamiento jerárquico son comparaciones descriptivas. PCA ayuda a representar parte de la variación. El tamaño desigual de los grupos y la muestra pequeña limitan cualquier interpretación como un perfil estable del alumnado. Se omiten perfiles si un grupo o su complemento tienen menos de tres personas.
 
 ## Reproducibilidad y lectura
 
-La metodología corresponde a la versión 2.1.0. `resultados/resumen.json` registra semilla, versiones y hashes de las fuentes. El notebook, las figuras, el tablero y los PDF usan el mismo análisis. Las encuestas y las portadas de referencia locales se necesitan solo para recalcular o regenerar los informes. Las portadas se conservan en `data/referencias/`, fuera de la documentación de entrega y excluidas de Git.
+`resultados/resumen.json` registra la versión de metodología, las versiones de bibliotecas y las huellas de las fuentes. El notebook, las figuras, el tablero y los PDF usan el mismo análisis. Las encuestas se necesitan para recalcular y las portadas originales para regenerar los informes. Los archivos de referencia quedan fuera de Git.
 
-La [guía de interpretación](INTERPRETACION.md) explica las métricas con los resultados de esta ejecución. Las definiciones técnicas pueden consultarse en la documentación de scikit-learn sobre [R²](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html), [referencia del promedio](https://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyRegressor.html) y [evaluación de modelos](https://scikit-learn.org/stable/modules/model_evaluation.html).
+La [guía de interpretación](INTERPRETACION.md) explica las métricas con los resultados de esta ejecución. Para consultar las definiciones técnicas, véase la documentación de scikit-learn 1.6.1 sobre [GridSearchCV](https://scikit-learn.org/1.6/modules/generated/sklearn.model_selection.GridSearchCV.html), [RandomizedSearchCV](https://scikit-learn.org/1.6/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) y [evaluación de modelos](https://scikit-learn.org/1.6/modules/model_evaluation.html).

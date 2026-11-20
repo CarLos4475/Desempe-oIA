@@ -12,7 +12,7 @@ import dashboard_datos
 
 # Una sesión activa puede conservar un adaptador anterior al contrato actual
 # de resultados y documentos. Se recarga una vez cuando cambia ese contrato.
-if getattr(dashboard_datos,'VERSION_ADAPTADOR',0)!=2:
+if getattr(dashboard_datos,'VERSION_ADAPTADOR',0)!=3:
     reload(dashboard_datos)
 
 from dashboard_datos import (NOMBRES_HERRAMIENTAS, NOMBRES_VARIABLES,
@@ -273,6 +273,30 @@ def regresion(r):
     st.download_button('Descargar métricas de regresión (CSV)',tabla.to_csv(index=False).encode('utf-8-sig'),file_name='regresion_prueba_agregada.csv',mime='text/csv')
 
 
+def mostrar_busquedas(ajuste, explicacion):
+    nombres = {'modelo__n_neighbors': 'vecinos', 'modelo__weights': 'voto',
+               'modelo__p': 'distancia', 'modelo__n_clusters': 'grupos',
+               'modelo__init': 'inicio', 'modelo__n_init': 'reinicios'}
+    legibles = {'uniform': 'igual', 'distance': 'por cercanía', 'random': 'al azar'}
+    with st.expander('Ver GridSearchCV y RandomizedSearchCV'):
+        st.write(explicacion)
+        filas = []
+        for fila in ajuste['busquedas']:
+            valores = {nombres[k]: v for k, v in fila['parametros'].items()}
+            if 'distancia' in valores:
+                valores['distancia'] = {1: 'Manhattan', 2: 'euclidiana'}[valores['distancia']]
+            config = ' · '.join(f'{k} {legibles.get(v, v)}' for k, v in valores.items())
+            filas.append({'Búsqueda': fila['metodo'], 'Combinaciones': fila['configuraciones'],
+                          'Configuración': config, f'{ajuste["metrica"]} media CV': fila['media'],
+                          'Desviación CV': fila['desviacion'],
+                          'Pliegues válidos': f'{fila["pliegues_validos"]}/{ajuste["n_folds"]}'})
+        st.dataframe(pd.DataFrame(filas).round(3), hide_index=True, width='stretch')
+        if ajuste.get('aplicado', True):
+            st.caption(f'Se conservó la configuración de {ajuste["mejor_metodo"]}. En caso de empate en media y pliegues válidos, se conserva GridSearchCV.')
+        else:
+            st.caption('Se muestran los grupos de la exploración sobre la muestra completa porque la búsqueda no produjo una configuración con silueta válida.')
+
+
 def modelos(r):
     s=r['supervisado'];c=r['clusters']
     titulo('EVALUACIÓN EXPLORATORIA','Qué muestran\nlos modelos.',
@@ -282,17 +306,25 @@ def modelos(r):
         if s['estado']!='ok':
             st.info('No hay suficientes respuestas para evaluar la clasificación. Puedes consultar la agrupación en la otra pestaña.')
         else:
+            ajuste = s.get('ajuste')
+            prueba = ajuste['test'] if ajuste else s['test']
+            candidato = 'KNN ajustado' if ajuste else s['seleccionado']
             metricas([('Respuestas que se pudieron clasificar',str(s['n_etiquetados']),'casos',f'{s["n_excluidos"]} respuestas ambiguas fuera del modelo'),
                       ('Entrenamiento',str(s['n_train']),'casos','Selección y validación cruzada'),
                       ('Prueba reservada',str(s['n_test']),'casos','Se revisa después de elegir el modelo'),
                       ('Validación estratificada',str(s['n_folds']),'pliegues','Cada pliegue aprende sus transformaciones')])
             if not s['supera_baseline_cv']:
-                mensaje('La referencia sencilla obtuvo un mejor F1.',
-                        'Predecir siempre la categoría más frecuente dio mejor F1 en validación que los modelos entrenados. Estos resultados ayudan a comparar métodos, pero no respaldan decisiones sobre estudiantes.')
+                mensaje('La referencia mayoritaria tuvo el mejor F1 en la comparación inicial.',
+                        'En las configuraciones fijas, predecir siempre la categoría más frecuente rindió mejor en validación. La prueba de KNN ajustado se muestra por separado abajo.')
             else:
                 mensaje('Hace falta probarlo con más datos.','Un F1 mayor en esta evaluación no garantiza que el modelo funcione igual con otros estudiantes.')
+            if ajuste:
+                mostrar_busquedas(ajuste, 'Ajustamos KNN dentro del conjunto de entrenamiento. Cada intento cambia la cantidad de vecinos, la forma de medir su distancia y el peso de su voto. Usamos F1 para comparar los intentos y guardamos la prueba para el final.')
+                f1_knn = max(fila['media'] for fila in ajuste['busquedas'])
+                f1_referencia = next(fila['cv_f1'] for fila in s['cv'] if fila['modelo'] == 'Baseline (mayoría)')
+                st.caption(f'En los pliegues de entrenamiento, el mejor KNN obtuvo F1 de {f1_knn:.3f} y la referencia mayoritaria obtuvo {f1_referencia:.3f}. Abajo se muestra la prueba reservada.')
             with st.container(border=True,key='panel_modelos_cv'):
-                seccion('Cómo les fue al clasificar las respuestas','La etiqueta distingue uso mixto (1) de uso declarado solo como guía o atajo (0). La respuesta que define esa etiqueta no se usa para predecirla.')
+                seccion('Comparación con configuraciones fijas','La etiqueta distingue uso mixto (1) de uso declarado solo como guía o atajo (0). La respuesta que define esa etiqueta queda fuera de los predictores.')
                 st.html(f'<div class="pasos"><span class="paso"><b>{s["n_train"]}</b> entrenamiento</span><span class="paso">CV de <b>{s["n_folds"]}</b> folds</span><span class="paso">Selección por <b>F1</b></span><span class="paso"><b>{s["n_test"]}</b> prueba</span></div>')
                 medida=st.segmented_control('Métrica de comparación',['F1','Accuracy'],default='F1',required=True,key='metrica_modelos')
                 campo='cv_f1' if medida=='F1' else 'cv_accuracy';sd=campo+'_sd'
@@ -306,15 +338,15 @@ def modelos(r):
                 st.caption('La desviación entre folds no es un intervalo de confianza. Cambiar la métrica de la gráfica no vuelve a seleccionar el candidato.')
             izq,der=st.columns([1.05,1])
             with izq,st.container(border=True,key='panel_modelos_test'):
-                seccion('Prueba reservada',f'Candidato seleccionado: {s["seleccionado"]}.')
-                cm=s['test']['confusion'];filas=[{'Real':['Exclusiva','Mixta'][i],'Predicción':['Exclusiva','Mixta'][j],'Casos':cm[i][j]} for i in range(2) for j in range(2)]
+                seccion('Prueba reservada',candidato)
+                cm=prueba['confusion'];filas=[{'Real':['Exclusiva','Mixta'][i],'Predicción':['Exclusiva','Mixta'][j],'Casos':cm[i][j]} for i in range(2) for j in range(2)]
                 base=alt.Chart(pd.DataFrame(filas)).encode(x=alt.X('Predicción:N',title='Predicción',axis=alt.Axis(labelAngle=0)),y=alt.Y('Real:N',title='Modalidad declarada'))
                 cuad=base.mark_rect(cornerRadius=4,stroke='white',strokeWidth=4).encode(color=alt.Color('Casos:Q',scale=alt.Scale(range=['#EAF0F7',AZUL]),legend=None),tooltip=['Real','Predicción','Casos'])
                 tex=base.mark_text(fontSize=24,font=FONT).encode(text='Casos:Q',color=alt.condition(alt.datum.Casos>2,alt.value('white'),alt.value('#285A88')))
                 grafica((cuad+tex).properties(height=240),'chart_confusion','Matriz de confusión agregada de la prueba reservada.')
             with der,st.container(border=True,key='panel_modelos_metricas'):
                 seccion('La prueba tiene pocos casos','Este resultado puede cambiar mucho con una sola respuesta.')
-                filas=[{'Indicador':nombre,'Candidato':s['test'][key],'Baseline':s['baseline_test'][key]} for key,nombre in [('accuracy','Accuracy'),('precision','Precisión'),('recall','Recall'),('f1','F1')]]
+                filas=[{'Indicador':nombre,'Candidato':prueba[key],'Baseline':s['baseline_test'][key]} for key,nombre in [('accuracy','Accuracy'),('precision','Precisión'),('recall','Recall'),('f1','F1')]]
                 st.dataframe(pd.DataFrame(filas),hide_index=True,width='stretch',column_config={'Candidato':st.column_config.NumberColumn(format='%.3f'),'Baseline':st.column_config.NumberColumn(format='%.3f')})
                 st.html(f'<div class="quiet">Con {s["n_test"]} casos de prueba, una sola predicción cambia accuracy en <b>{s["test_sensible_pp"]:.1f} puntos porcentuales</b>.</div>')
             with st.expander('Ver tabla de validación y definición del experimento'):
@@ -326,14 +358,17 @@ def modelos(r):
     with tabs[2]:
         if c['estado']!='ok':st.info('No hay suficientes observaciones para explorar agrupaciones.')
         else:
+            ajuste = c.get('ajuste')
             st.write('')
             metricas([('Respuestas con datos de entorno',str(c['n']),'casos','Sin completar respuestas de bienestar'),
-                      ('Mejor k ensayado',str(c['k']),'grupos','Entre los valores k = 2 a 5'),
-                      ('Silhouette',f'{c["silhouette"]:.3f}','','K-Means sobre variables estandarizadas'),
+                      ('Grupos de K-Means',str(c['k']),'grupos','Elegidos por validación' if ajuste and ajuste['aplicado'] else 'Exploración en la muestra'),
+                      ('Silueta en la muestra',f'{c["silhouette"]:.3f}','','Configuración final sobre todos los casos observados'),
                       ('Varianza PCA',f'{100*sum(c["pca_varianza"]):.1f}','%','Primeros dos componentes')])
+            if ajuste:
+                mostrar_busquedas(ajuste, 'Probamos distintos números de grupos y formas de iniciar K-Means. En cada pliegue el modelo aprende los centros con una parte de los datos y asigna los casos reservados al centro más cercano. Medimos la separación por silueta. Si un pliegue no permite calcularla, se penaliza con −1 al comparar configuraciones.')
             a,b=st.columns(2)
             with a,st.container(border=True,key='panel_clusters_k'):
-                seccion('Exploración del número de grupos')
+                seccion('Exploración del número de grupos','Este gráfico mide la silueta en toda la muestra con parámetros fijos. La tabla de arriba usa pliegues de validación.')
                 d=pd.DataFrame([{'k':int(key),'Silhouette':v} for key,v in c['siluetas'].items()])
                 grafica(alt.Chart(d).mark_line(point=True,color=AZUL).encode(x=alt.X('k:O',title='k ensayado',axis=alt.Axis(labelAngle=0)),y=alt.Y('Silhouette:Q',title=None,scale=alt.Scale(zero=False)),tooltip=['k',alt.Tooltip('Silhouette:Q',format='.3f')]).properties(height=240),'chart_siluetas','Puntuación silhouette para cada número de grupos ensayado.')
             with b,st.container(border=True,key='panel_clusters_tamanos'):
@@ -370,9 +405,13 @@ def documentacion(r):
             tabla=pd.DataFrame(r['descriptivos']).T
             st.download_button('Descargar descriptivos (CSV)',tabla.to_csv(index_label='Variable').encode('utf-8-sig'),file_name='descriptivos_agregados.csv',mime='text/csv',width='stretch')
     with st.expander('Cómo se construyó el estudio',expanded=True):
-        st.markdown('1. **Validar e integrar:** esquemas y cuentas únicas; unión uno a uno.\n2. **Codificar sin inventar respuestas:** unidades, alias y modalidades; las ausencias se conservan.\n3. **Describir:** TF-IDF y puntuación léxica con negaciones; asociaciones solo sobre casos observados.\n4. **Evaluar:** entrenamiento y prueba separados, transformaciones dentro de los folds y referencia mayoritaria.\n5. **Comunicar:** resultados agregados, denominadores visibles y limitaciones explícitas.')
+        st.markdown('1. **Limpiar en Python.** Validamos cuentas y fechas, unificamos unidades y revisamos alias de herramientas con patrones y similitud de nombres.\n2. **Explorar.** Calculamos indicadores, distribuciones y asociaciones con las respuestas disponibles.\n3. **Ajustar modelos.** Probamos GridSearchCV y RandomizedSearchCV en K-Means y KNN con el mismo conjunto de pliegues para cada tarea. KNN también se compara con la referencia mayoritaria en una prueba reservada.\n4. **Presentar.** Publicamos métricas agregadas y el número de respuestas que sustenta cada resultado.')
     with st.expander('Cobertura y calidad de los datos'):
         m=r['muestra'];q=r['calidad']
+        if 'limpieza' in r:
+            ia = r['limpieza']['ia']['columnas_cubiertas']
+            bienestar = r['limpieza']['bienestar']['columnas_cubiertas']
+            st.write(f'El código de Python trata las {ia} columnas del formulario de IA y las {bienestar} seleccionadas del formulario de bienestar.')
         st.dataframe(pd.DataFrame([{'Fuente / control':'Respuestas de IA','Casos':m['ia']},{'Fuente / control':'Respuestas de bienestar','Casos':m['bienestar']},{'Fuente / control':'Casos emparejados','Casos':m['emparejados']},{'Fuente / control':'Sin encuesta complementaria','Casos':m['solo_ia']},{'Fuente / control':'Textos abiertos de IA ausentes','Casos':q['textos_ia_ausentes']}]),hide_index=True,width='stretch')
         st.write('La ausencia de encuesta no se transforma en bienestar neutral. Las metas de negocio son propuestas de seguimiento, no políticas institucionales aprobadas.')
     with st.expander('Reproducibilidad'):
