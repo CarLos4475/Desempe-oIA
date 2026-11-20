@@ -3,257 +3,285 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Persona 3 · Ensayo del tablero</title>
+<title>Entiende el tablero · Persona 3</title>
 <style>
-:root{color-scheme:light;--ink:#143451;--blue:#205681;--navy:#112c43;--paper:#f8f4e8;--card:#fffdf7;--line:#ddd6c0;--muted:#4c6474;--gold:#f8e6a2;--white:#fffdf7}
+:root{color-scheme:light;--ink:#172c39;--navy:#153044;--blue:#265973;--muted:#526574;--paper:#f6f1e5;--sheet:#fffdf6;--line:#ddd2bc;--gold:#f7e0a4;--bluewash:#e7f0f3;--shadow:0 5px 16px #4e3c2010}
 *{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 "Segoe UI",sans-serif}
-a{color:var(--blue);text-underline-offset:3px}
-button,a,summary{touch-action:manipulation}
-button{font:inherit;cursor:pointer}
-button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #357fba;outline-offset:4px}
-header{background:var(--navy);color:var(--white);border-bottom:5px solid #d6ae50}
-.wrap{width:min(1320px,100% - 56px);margin:auto}
-.brand{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:22px 0;border-bottom:1px solid #ffffff30}
-.brand span{font-size:14px;font-weight:650;letter-spacing:.065em}
-.headlink{color:var(--white);font-size:14px}
-.hero{padding:33px 0 37px;display:flex;justify-content:space-between;align-items:end;gap:28px}
-h1,h2,h3,p{margin:0}
-h1{font:700 clamp(2.2rem,5vw,4rem)/1.02 Georgia,serif;letter-spacing:-.045em}
-.hero p{max-width:57ch;color:#d3e2ed;margin-top:10px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--blue);border-radius:7px;padding:9px 14px;text-decoration:none;white-space:nowrap;font-weight:650;background:var(--blue);color:white}
-.btn:hover{background:#16446a}
-.btn.light{color:var(--navy);background:var(--gold);border-color:var(--gold)}
-.btn.light:hover{background:#ffe486}
-.btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn.secondary:hover{background:#eae8df}
-.btn:disabled{opacity:.42;cursor:default}
-.layout{display:grid;grid-template-columns:244px minmax(0,1fr);gap:30px;padding:32px 0 62px}
-.rail{align-self:start;position:sticky;top:16px}
-.rail h2,.eyebrow{font-size:.75rem;font-weight:750;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.steps{margin:9px 0 20px;display:grid;gap:6px}
-.step-btn{width:100%;border:1px solid transparent;background:transparent;border-radius:8px;padding:9px 10px;display:grid;grid-template-columns:25px 1fr;text-align:left;column-gap:9px;color:var(--ink)}
-.step-btn:hover{background:#efe9d6}
-.step-btn[aria-current="step"]{border-color:#d0b96b;background:#f9edbf;font-weight:700}
-.step-btn small{grid-column:2;font-size:.75rem;color:var(--muted);font-weight:500}
-.num{font-size:.75rem;font-weight:700;display:grid;place-items:center;width:24px;height:24px;border:1px solid #304a5d4d;border-radius:50%;align-self:start;margin-top:2px}
-.timer{padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
-.timer-meta{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.timer output{font-size:1.5rem;font-weight:750;font-variant-numeric:tabular-nums}
-.timer-actions{display:flex;gap:7px;margin-top:8px}
-.timer-actions .btn{font-size:.83rem;padding:6px 9px}
-article{min-width:0}
-.panel{border:1px solid var(--line);background:var(--card);border-radius:11px;overflow:hidden}
-.step-head{padding:24px 26px;background:#fdf7e2;border-bottom:1px solid var(--line)}
-.step-head h2{font:700 clamp(1.65rem,3vw,2.6rem)/1.1 Georgia,serif;letter-spacing:-.035em;margin:4px 0 8px}
-.step-head p:not(.eyebrow){font-size:.94rem;color:var(--muted)}
-.step-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
-.step-body>section{padding:22px 25px 26px;min-width:0}
-.step-body>section+section{border-left:1px solid var(--line)}
-h3{font-size:1.07rem;margin:0 0 7px}
-ol{margin:5px 0 0;padding-left:22px}
-li{padding-left:3px;margin-bottom:8px}
-kbd{font:650 .86em/1.25 "Segoe UI",sans-serif;padding:2px 6px;background:#edf2f6;border:1px solid #c4d3df;color:#163650;border-radius:4px}
-.expected{background:#eaf0f6;border-left:3px solid var(--blue);padding:12px 14px;margin-top:15px;border-radius:0 6px 6px 0;font-size:.92rem}
-.coaching{margin-top:13px;color:var(--muted);font-size:.92rem}
-.speech p+p{margin-top:10px}
-.speech p{line-height:1.54}
-details{border-top:1px solid var(--line)}
-summary{cursor:pointer;color:var(--ink);font-weight:700}
-.panel details{padding:12px 25px}
-.panel details[open] summary{margin-bottom:8px}
-.navbuttons{display:flex;gap:10px;justify-content:space-between;margin:16px 0 26px}
-.practice,.recap{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:20px 24px;margin-top:19px}
-.practice p{max-width:70ch;margin-bottom:12px;color:var(--muted)}
-.practice iframe{display:block;width:100%;height:clamp(560px,78vh,890px);border:1px solid var(--line);border-radius:8px;margin-top:15px;background:#f5f5f5}
-.recap details{padding:10px 0}
-.recap p{margin-top:7px}
-.tablescroll{overflow-x:auto;margin:11px 0 12px}
-table{border-collapse:collapse;width:100%;font-size:.94rem;white-space:nowrap}
-th,td{text-align:left;border-bottom:1px solid var(--line);padding:8px 9px}
-th{background:#f5edd2}
-.nowrap{white-space:nowrap}
-@media(max-width:970px){.layout{grid-template-columns:191px minmax(0,1fr);gap:17px}.step-body{grid-template-columns:1fr}.step-body>section+section{border-left:0;border-top:1px solid var(--line)}}
-@media(max-width:640px){.wrap{width:calc(100% - 28px)}.hero{align-items:start;flex-direction:column;gap:16px}.layout{grid-template-columns:1fr;padding-top:18px}.rail{position:static}.steps{grid-template-columns:1fr 1fr;margin-bottom:10px}.step-btn{padding:6px}.timer{display:flex;align-items:center;justify-content:space-between;gap:10px}.timer-meta{gap:12px}.timer-actions{margin:0}.step-body>section,.step-head{padding:18px}.practice,.recap{padding:16px}.brand{gap:12px}.btn{white-space:normal}}
-@media print{header{color:var(--ink);background:white}.brand,.rail,.hero .btn,.navbuttons,.practice,.recap{display:none}.hero p{color:var(--muted)}.layout{display:block}.panel{break-inside:avoid}}
+body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.62 "Segoe UI",sans-serif}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
+h1,h2{font-family:Georgia,serif;line-height:1.1;letter-spacing:-.032em}
+h1{font-size:clamp(2.65rem,7vw,5rem);max-width:14ch}
+h2{font-size:clamp(1.7rem,4vw,2.5rem)}
+h3{font-size:1.08rem;line-height:1.35}
+p,p+a{margin-top:.55rem}
+a{color:var(--blue);text-underline-offset:.18em}
+button,summary{cursor:pointer}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #145b85;outline-offset:4px}
+.wrap{width:min(1160px,100% - 64px);margin-inline:auto}
+header{background:var(--navy);color:var(--sheet);border-bottom:5px solid #c59d46;padding:34px 0 40px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px}
+.kicker{font-size:.77rem;letter-spacing:.085em;text-transform:uppercase;font-weight:700;margin:0 0 9px}
+.hero p:not(.kicker){color:#d6e4eb;max-width:51ch}
+.hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.hero a:focus-visible{outline-color:var(--gold)}
+.button{display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:650;text-decoration:none;padding:.48rem .85rem;border:1px solid var(--blue);border-radius:5px;background:var(--blue);color:#fff}
+.hero .button{color:var(--navy);background:var(--gold);border-color:var(--gold)}
+.hero .button:hover{background:#ffeab8}
+.hero .sub-link{color:#ecf3f7;font-size:.91rem}
+.layout{display:grid;grid-template-columns:211px minmax(0,1fr);align-items:start;gap:32px;padding:33px 0 55px}
+aside{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto}
+aside nav ul{padding:0;list-style:none}
+aside a{display:block;padding:5px 8px;border-left:2px solid var(--line);text-decoration:none;color:var(--ink)}
+aside a:hover,aside a[aria-current="location"]{border-color:#9a6e25;background:#eee4cc}
+aside .kicker{margin-top:15px}
+aside .kicker:first-child{margin-top:0}
+aside .back{font-size:.88rem;margin-top:17px}
+main{min-width:0}
+.sheet{position:relative;scroll-margin-top:18px;padding:clamp(18px,4vw,32px);border:1px solid var(--line);border-top:3px solid #b8995a;background:var(--sheet);box-shadow:var(--shadow);border-radius:6px;margin-bottom:19px}
+.sheet.model{border-top-color:var(--blue)}
+.sheet:target{border-color:var(--blue)}
+.sheet>header{background:none;color:inherit;border:0;padding:0;margin-bottom:13px}
+.sheet .kicker{color:var(--blue);margin-bottom:5px}
+.route{font-size:.9rem;color:var(--muted);margin-top:8px}
+.route strong{color:var(--ink)}
+.sheet>section{margin-top:20px}
+.practice{background:var(--bluewash);padding:12px 14px;border-left:3px solid var(--blue);margin-top:17px;border-radius:0 4px 4px 0}
+.practice p{margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:14px 0}
+.stat{padding:10px 12px;background:#f4ecd6;border-radius:4px}
+.stat strong{font:700 1.48rem/1.2 Georgia,serif;display:block;font-variant-numeric:tabular-nums}
+.stat span{font-size:.86rem;line-height:1.35;display:block;margin-top:4px}
+.definition{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 15px;margin-top:10px}
+.definition dt{font-weight:700}
+.sheet ol,.sheet ul{padding-left:1.45em;margin-top:9px}
+.sheet li+li{margin-top:5px}
+.study{margin-top:17px;border-top:1px dashed var(--line);padding-top:10px}
+summary{font-weight:700;color:var(--blue)}
+.choice{margin:9px 0 12px;display:flex;flex-wrap:wrap;gap:6px}
+.choice button{font:inherit;font-size:.88rem;font-weight:650;border:1px solid #a3b4bd;color:var(--ink);border-radius:5px;padding:5px 9px;background:white}
+.choice button:hover{background:var(--bluewash)}
+.choice button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:white}
+.table-wrap{overflow-x:auto;margin-top:9px}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{padding:.48rem .64rem;border:1px solid var(--line)}
+thead th{background:#f3ebd4}
+td[data-hit]{font-weight:700;text-align:center}
+td[data-active]{background:var(--bluewash);box-shadow:inset 0 0 0 2px var(--blue)}
+output{display:block;margin-top:8px;min-height:3.55em;color:var(--ink);font-size:.92rem}
+small{font-size:.86rem;color:var(--muted)}
+@media(max-width:780px){.wrap{width:calc(100% - 36px)}.layout{grid-template-columns:152px minmax(0,1fr);gap:17px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.hero,.layout{grid-template-columns:1fr}.hero-actions{flex-direction:row;flex-wrap:wrap;align-items:center}.layout{padding-top:20px}aside{position:static;max-height:none}aside nav ul{display:flex;flex-wrap:wrap;gap:5px}aside nav a{border:1px solid var(--line);background:var(--sheet);padding:3px 8px;border-radius:4px;font-size:.9rem}aside .back{display:none}.definition{grid-template-columns:1fr;gap:2px}.definition dt:not(:first-child){margin-top:6px}th,td{padding:.43rem}}
+@media print{header{background:white;color:var(--ink);border-color:var(--line)}.hero p:not(.kicker){color:var(--muted)}.layout{display:block}aside,.hero-actions,.choice{display:none}.sheet{box-shadow:none;break-inside:avoid}}
 </style>
 </head>
-<body>
+<body id="inicio">
 <header>
-  <div class="wrap">
-    <div class="brand"><span>IA EN EL ESTUDIO · EXPOSICIÓN</span><a class="headlink" href="index.html#diapositiva-11" target="_blank" rel="noopener">Ver diapositiva 11 ↗</a></div>
-    <div class="hero">
-      <div><h1>Ensayo de la Persona 3</h1><p>De la diapositiva 11 al cierre, con el guion, los clics y los datos que debes señalar en el tablero.</p></div>
-      <a class="btn light" id="dashboard-main" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener">Abrir tablero ↗</a>
+  <div class="wrap hero">
+    <div>
+      <p class="kicker">Persona 3 · Sistemas Inteligentes</p>
+      <h1>Entiende el tablero</h1>
+      <p>Recorre cada sección con el tablero abierto. En Modelos puedes ver de dónde sale cada cifra y practicar cómo explicarla con tus palabras.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="button" id="dashboard-main" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener">Abrir tablero ↗</a>
+      <a class="sub-link" href="index.html#diapositiva-12" target="_blank" rel="noopener">Ir a la diapositiva 12 ↗</a>
+      <a class="sub-link" id="dashboard-publico" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener" hidden>Abrir tablero público ↗</a>
     </div>
   </div>
 </header>
 <div class="wrap layout">
-  <aside class="rail">
-    <h2>Tu recorrido · 4 min 45 s</h2>
-    <nav class="steps" id="steps" aria-label="Pasos de la Persona 3"></nav>
-    <div class="timer">
-      <div class="timer-meta"><span>Cronómetro</span><output id="clock" aria-label="Tiempo de ensayo">0:00</output></div>
-      <div class="timer-actions"><button class="btn" id="run" type="button">Iniciar</button><button class="btn secondary" id="reset" type="button">Reiniciar</button></div>
-    </div>
+  <aside>
+    <nav aria-label="Secciones de estudio">
+      <p class="kicker">En el menú del tablero</p>
+      <ul>
+        <li><a href="#panorama">Panorama</a></li>
+        <li><a href="#uso">Uso de IA</a></li>
+        <li><a href="#entorno">Entorno y bienestar</a></li>
+      </ul>
+      <p class="kicker">Dentro de Modelos</p>
+      <ul>
+        <li><a href="#clasificacion">Clasificación · KNN</a></li>
+        <li><a href="#regresion">Regresión · R²</a></li>
+        <li><a href="#agrupacion">Agrupación · K-Means</a></li>
+      </ul>
+      <p class="kicker">Informes</p>
+      <ul><li><a href="#documentacion">Documentación</a></li></ul>
+    </nav>
+    <a class="back" href="#inicio">↑ Volver al inicio</a>
   </aside>
-  <main id="main">
-    <article class="panel" id="panel" aria-label="Paso de ensayo" tabindex="-1"></article>
-    <div class="navbuttons">
-      <button class="btn secondary" id="previous" type="button">← Paso anterior</button>
-      <button class="btn" id="next" type="button">Siguiente paso →</button>
-    </div>
-    <section class="practice">
-      <h3>Practica con el tablero real</h3>
-      <p>Para ensayar el cambio de pantalla, abre la presentación y pulsa «Abrir tablero» en la diapositiva 12. Puedes dejar esta guía abierta en otra pestaña.</p>
-      <button id="embed" class="btn secondary" type="button" aria-expanded="false" aria-controls="sandbox" hidden>Mostrar tablero local aquí</button>
-      <a class="btn secondary" href="https://desempe-oia-yxvqtsq3qqremr7yxsxfsg.streamlit.app/" target="_blank" rel="noopener">Tablero público ↗</a>
-      <div id="sandbox" hidden></div>
-    </section>
-    <section class="recap">
-      <h3>Preguntas que te pueden hacer</h3>
-      <details><summary>¿Por qué Streamlit y Altair?</summary><p>Ya teníamos el análisis en Python. Streamlit pone los resultados en una página con secciones, filtros y descargas. Altair dibuja las gráficas y muestra cifras al pasar el cursor.</p></details>
-      <details><summary>¿Dónde se ve qué columnas se limpiaron?</summary><p>En Documentación abre «Cobertura y calidad de los datos». El tablero resume las 18 columnas del formulario de IA y las 9 seleccionadas de bienestar. El notebook y el informe técnico detallan las reglas.</p></details>
-      <details><summary>¿En qué se distinguen las dos búsquedas?</summary><p>GridSearchCV recorre todas las combinaciones de la lista que le dimos. RandomizedSearchCV prueba una selección al azar. Las dos comparan configuraciones por validación cruzada. Para KNN miramos el F1 y guardamos 6 respuestas para la prueba final. Para K-Means miramos la silueta.</p></details>
-      <details><summary>¿El KNN ya sirve para predecir cómo usa IA cualquier estudiante?</summary><p>En la prueba de 6 casos, KNN obtuvo un F1 de 0.889 y la referencia 0.800. En validación pasó lo contrario: el mejor KNN tuvo 0.627 y la referencia 0.713. Las cifras cambian al evaluar otras respuestas. Hacen falta más casos para saber cómo funcionaría fuera de esta muestra.</p></details>
-      <details><summary>¿Qué me dice el número de grupos?</summary><p>La configuración elegida formó 4 grupos de 12, 5, 1 y 1 personas. El tablero junta los grupos pequeños en una barra y evita publicar perfiles individuales. La silueta media de la búsqueda sale de los grupos asignados en validación. La silueta final de 0.110 describe los grupos formados con la muestra completa.</p></details>
-      <details><summary>¿Por qué el porcentaje de Gemini se mantiene al quitar otra barra?</summary><p>Son 15 menciones entre 24 respuestas, es decir, 62.5 %. El filtro cambia cuáles herramientas se ven. La base sigue contando a las 24 personas.</p></details>
-      <details><summary>¿Por qué hay 24 respuestas en una pantalla y 19 en otra?</summary><p>24 personas respondieron sobre IA. De ellas, 19 también contestaron sobre entorno y bienestar. Para comparar traslado y horas de IA hacen falta los dos datos.</p></details>
-      <details><summary>¿Qué significa que R² sea negativo?</summary><p>La predicción tuvo más error cuadrático que usar el promedio de las horas observadas en la prueba. La referencia de la gráfica usa el promedio del entrenamiento. Por eso las dos filas pueden tener R² negativo. Para contar la diferencia en minutos, usa MAE.</p></details>
-      <details><summary>¿Qué diferencia hay entre MAE y RMSE?</summary><p>Las dos se leen en horas. MAE es el error absoluto medio. RMSE da más peso a los errores grandes. Cuando digas «48 minutos», estás convirtiendo el MAE de la regresión.</p></details>
-      <details><summary>¿Esto demuestra algo sobre las calificaciones?</summary><p>Los cuestionarios recogen hábitos y percepciones. Un modelo clasifica el uso que declararon y el otro estima horas de IA. Para estudiar cambios en el desempeño harían falta calificaciones verificadas o tareas comparables, además de más participantes.</p></details>
-    </section>
+  <main>
+    <article class="sheet" id="panorama">
+      <header><h2>Panorama</h2><p class="route">Menú izquierdo → <strong>Panorama</strong></p></header>
+      <p>Las tarjetas son los <strong>KPIs</strong>, cifras que resumen el grupo. Hubo <strong>24 respuestas sobre IA</strong>. De esas personas, <strong>19</strong> también contestaron la encuesta sobre su entorno.</p>
+      <div class="stats">
+        <div class="stat"><strong>1.5 h</strong><span>Mediana diaria de uso</span></div>
+        <div class="stat"><strong>54.2 %</strong><span>Uso mixto · 13 de 24</span></div>
+        <div class="stat"><strong>54.2 %</strong><span>Dos herramientas o más · 13 de 24</span></div>
+        <div class="stat"><strong>60 min</strong><span>Mediana del traslado</span></div>
+      </div>
+      <p>Para entender la <strong>mediana</strong>, imagina una fila ordenada del tiempo más corto al más largo. La mediana es el punto del centro de esa fila.</p>
+      <p>La gráfica circular muestra las modalidades <strong>guía</strong> para entender o aprender, <strong>atajo</strong> para agilizar tareas y <strong>mixto</strong> para quienes dijeron usarla de ambas formas. También aparecen las respuestas contextuales o difíciles de clasificar.</p>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>En «Las herramientas más mencionadas», cambia de <strong>Respuestas</strong> a <strong>Porcentaje</strong>. Gemini pasa de 15 menciones a 62.5 %.</p></div>
+      <details class="study"><summary>¿Por qué uso mixto y uso de varias herramientas tienen el mismo porcentaje?</summary><p>En las dos tarjetas se cuentan 13 de 24 respuestas. Una persona puede usar una sola herramienta para aprender y agilizar tareas, así que las tarjetas responden preguntas distintas.</p></details>
+    </article>
+
+    <article class="sheet" id="uso">
+      <header><h2>Uso de IA</h2><p class="route">Menú izquierdo → <strong>Uso de IA</strong></p></header>
+      <dl class="definition">
+        <dt>Herramientas</dt><dd>Gemini tuvo 15 menciones, ChatGPT 11 y Claude 8. Cada persona podía mencionar varias, así que puede aparecer en más de una barra.</dd>
+        <dt>Semestre de inicio</dt><dd>Cuenta desde qué semestre dijeron usar IA. En esta encuesta, tercero fue el más mencionado.</dd>
+        <dt>TF-IDF</dt><dd>Destaca términos o frases que ayudan a distinguir el contenido de las respuestas. Una palabra destacada puede aparecer al describir una ventaja o al contar una mala experiencia.</dd>
+      </dl>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>En <strong>Mostrar</strong> elige <strong>Porcentaje</strong> y quita una herramienta del filtro. Mira que Gemini sigue en 62.5 % porque el porcentaje se calcula con las 24 respuestas.</p></div>
+      <details class="study"><summary>¿Qué cambia al quitar una herramienta del filtro?</summary><p>Cambian las barras visibles. El total de personas que contestaron se mantiene. Gemini sigue siendo 15 de 24.</p></details>
+    </article>
+
+    <article class="sheet" id="entorno">
+      <header><h2>Entorno y bienestar</h2><p class="route">Menú izquierdo → <strong>Entorno y bienestar</strong></p></header>
+      <p>Aquí se usan las <strong>19 respuestas emparejadas</strong>. Sobre las otras 5 personas hay datos de IA y el entorno quedó sin observar.</p>
+      <dl class="definition">
+        <dt>Traslado</dt><dd>La línea va del mínimo al máximo, la caja contiene el 50 % central y la marca dorada señala la mediana de 60 minutos.</dd>
+        <dt>Spearman</dt><dd>Ayuda a ver si al subir una variable también tiende a subir o bajar la otra. Para traslado y horas de IA salió ρ = 0.137 y p = 0.575. En estos datos la tendencia positiva fue débil y la evidencia quedó insuficiente para afirmar una relación clara.</dd>
+        <dt>Matriz de colores</dt><dd>Cada casilla cruza dos variables. Las puntuaciones de polaridad vienen de palabras y reglas de negación. Un cero puede indicar que el vocabulario del análisis no encontró una señal en el texto.</dd>
+      </dl>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>Encuentra «Traslado y horas de IA». Antes de comentar el 0.137, ubica <strong>n = 19</strong> para saber cuántas respuestas sustentan la comparación.</p></div>
+      <details class="study"><summary>¿Por qué hay 24 respuestas en Panorama y 19 aquí?</summary><p>Para comparar traslado y uso diario hace falta que cada persona haya contestado ambos formularios. Con 19 personas tenemos los dos datos.</p></details>
+    </article>
+
+    <article class="sheet model" id="clasificacion">
+      <header><p class="kicker">Modelos · Aprendizaje supervisado</p><h2>Clasificación con KNN</h2><p class="route">Menú izquierdo → <strong>Modelos → Clasificación</strong></p></header>
+      <p><strong>La pregunta.</strong> ¿Podemos distinguir si alguien reporta uso mixto o uso exclusivo como guía o atajo? La categoría declarada es la etiqueta que usamos para aprender y comprobar los aciertos. La pregunta que la define queda fuera de las entradas del modelo.</p>
+      <p><strong>Cómo funciona.</strong> Imagina que buscas a los compañeros con hábitos de estudio más parecidos a los tuyos. KNN toma los casos más cercanos del entrenamiento y sus etiquetas votan. La configuración elegida consultó <strong>3 vecinos</strong> con el mismo peso para cada voto.</p>
+
+      <section aria-labelledby="cls-validacion">
+        <h3 id="cls-validacion">Primero se prueban configuraciones</h3>
+        <p>De las 24 respuestas, 22 tenían una categoría clara. Se usaron 16 para entrenar y comparar configuraciones. En validación cruzada, se aparta una parte de esas respuestas en cada ronda y se revisa qué tan bien se clasifican. Las 6 de la prueba final quedan guardadas hasta elegir la configuración.</p>
+        <p>En <strong>«Ver GridSearchCV y RandomizedSearchCV»</strong> aparecen las dos búsquedas. La primera revisa toda la cuadrícula y la segunda toma algunas combinaciones al azar. Cambiamos el número de vecinos, la forma de medir distancia y el peso del voto.</p>
+        <div class="table-wrap">
+          <table aria-label="Búsquedas y referencia en validación de KNN">
+            <thead><tr><th scope="col">Método</th><th scope="col">Combinaciones</th><th scope="col">F1 medio</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">GridSearchCV</th><td>16</td><td>0.627</td></tr>
+              <tr><th scope="row">RandomizedSearchCV</th><td>8</td><td>0.560</td></tr>
+              <tr><th scope="row">Referencia mayoritaria</th><td>Siempre predice mixto</td><td>0.713</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>En estos ensayos la referencia quedó arriba. El gráfico de «Comparación con configuraciones fijas» incluye otros clasificadores con sus parámetros iniciales. La prueba que aparece más abajo corresponde al <strong>KNN ajustado</strong>.</p>
+      </section>
+
+      <section aria-labelledby="cls-matriz">
+        <h3 id="cls-matriz">Lee la matriz de la prueba reservada</h3>
+        <p>Las filas dicen qué declaró la persona y las columnas, qué predijo KNN. Selecciona una métrica para ver qué casillas intervienen en el cálculo.</p>
+        <div class="choice" role="group" aria-label="Métrica para resaltar en la matriz">
+          <button type="button" data-metric="accuracy" aria-pressed="true">Aciertos (accuracy)</button>
+          <button type="button" data-metric="precision" aria-pressed="false">Precisión</button>
+          <button type="button" data-metric="recall" aria-pressed="false">Recall</button>
+          <button type="button" data-metric="f1" aria-pressed="false">F1</button>
+        </div>
+        <div class="table-wrap">
+          <table id="matriz-knn" aria-label="Matriz de confusión del KNN en la prueba">
+            <thead><tr><th scope="col">Modalidad real</th><th scope="col">Predijo exclusiva</th><th scope="col">Predijo mixta</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Exclusiva</th><td data-hit="tn" data-active>1</td><td data-hit="fp">1</td></tr>
+              <tr><th scope="row">Mixta</th><td data-hit="fn">0</td><td data-hit="tp" data-active>4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <output id="resultado-metrica" aria-live="polite">5 de 6. Las casillas en diagonal son los aciertos.</output>
+        <p>En esta prueba KNN acertó <strong>5 de 6</strong> con F1 de 0.889. La referencia acertó <strong>4 de 6</strong> con F1 de 0.800. La ventaja aquí equivale a un acierto.</p>
+      </section>
+
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>Abre el desplegable de las búsquedas y localiza el F1 medio. Después baja a <strong>Prueba reservada</strong> y busca la casilla de exclusiva real que KNN marcó como mixta.</p></div>
+      <details class="study"><summary>¿Cómo pudo ganar la referencia en validación y KNN en prueba?</summary><p>Validación resume varias rondas con las respuestas de entrenamiento. La prueba usa otras 6 respuestas y la diferencia fue un solo acierto. Para saber si se repite hace falta probar con más casos.</p></details>
+    </article>
+
+    <article class="sheet model" id="regresion">
+      <header><p class="kicker">Modelos · Predicción numérica</p><h2>Regresión y R²</h2><p class="route">Menú izquierdo → <strong>Modelos → Regresión (R²)</strong></p></header>
+      <p><strong>La pregunta.</strong> ¿Ayudan el semestre de inicio y el número de herramientas a estimar las horas diarias de IA que declara una persona?</p>
+      <p>La regresión aprendió con 18 respuestas. La comparamos en las mismas 6 de prueba con una regla sencilla que predice siempre el <strong>promedio de horas del entrenamiento</strong>.</p>
+      <div class="table-wrap">
+        <table aria-label="Resultados de regresión en la prueba">
+          <thead><tr><th scope="col">Métrica</th><th scope="col">Regresión lineal</th><th scope="col">Referencia</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">R²</th><td>−0.245</td><td>−0.064</td></tr>
+            <tr><th scope="row">MAE</th><td>0.808 h · ≈ 48 min</td><td>0.634 h · ≈ 38 min</td></tr>
+            <tr><th scope="row">RMSE</th><td>1.039 h</td><td>0.961 h</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <dl class="definition">
+        <dt>MAE</dt><dd>Promedia de cuánto fue cada error, sin importar si la predicción se pasó o quedó corta. En esta prueba la regresión se desvió unos 48 minutos y la referencia unos 38. Un valor menor indica menos error.</dd>
+        <dt>RMSE</dt><dd>También se lee en horas. Le da más peso a las equivocaciones grandes.</dd>
+        <dt>R²</dt><dd>Compara los errores cuadrados con lo que daría usar la media de las horas observadas en la prueba. Un 1 indica predicción perfecta, un 0 iguala esa media y un valor negativo indica más error. Se lee como un puntaje, con valores más altos preferibles.</dd>
+      </dl>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>Cambia el selector de R² a <strong>MAE (horas)</strong>. La barra más corta es la de la referencia y muestra cuál se desvió menos.</p></div>
+      <details class="study"><summary>¿Por qué también sale negativo el R² de la referencia?</summary><p>La referencia predice con el promedio del entrenamiento. La fórmula de R² compara con el promedio de las horas observadas en la prueba. Esos dos promedios pueden ser distintos.</p></details>
+    </article>
+
+    <article class="sheet model" id="agrupacion">
+      <header><p class="kicker">Modelos · Aprendizaje no supervisado</p><h2>Agrupación con K-Means</h2><p class="route">Menú izquierdo → <strong>Modelos → Agrupación exploratoria</strong></p></header>
+      <p><strong>La pregunta.</strong> ¿Qué respuestas quedan juntas al comparar características como horas de IA, herramientas y traslado? Se usan los 19 casos con datos de ambas encuestas y el algoritmo parte de esas características sin etiquetas de grupo.</p>
+      <p><strong>Cómo funciona.</strong> Imagínate ordenando fichas en montones. K-Means coloca centros, asigna cada ficha al centro más cercano y ajusta la posición de los centros. Aquí <strong>k cuenta montones</strong>. En KNN, <strong>k cuenta vecinos que votan</strong>.</p>
+      <p>En <strong>«Ver GridSearchCV y RandomizedSearchCV»</strong>, la cuadrícula probó 16 configuraciones y la búsqueda aleatoria, 8. Las dos eligieron 4 grupos, con una <strong>silueta media de 0.196</strong> en los casos apartados por ronda. La silueta mide cuán cerca quedaron las fichas de su propio grupo y cuán lejos de los demás. Valores cercanos a cero indican poca separación.</p>
+      <dl class="definition">
+        <dt>Grupos finales</dt><dd>Al ajustar sobre la muestra completa quedaron grupos de 12, 5, 1 y 1 personas, con silueta 0.110. El tablero junta los dos grupos pequeños en una barra para mostrar solo el conteo agregado.</dd>
+        <dt>Gráfica por k</dt><dd>Los puntos muestran una exploración sobre toda la muestra con parámetros fijos. Ahí el punto más alto está en k = 2. Los 4 del ajuste vienen de comparar las configuraciones en validación.</dd>
+        <dt>Varianza PCA</dt><dd>Al resumir las variables en dos ejes se conserva alrededor de 49.5 % de su variación. Esa cifra dice cuánto conserva el resumen de los datos.</dd>
+      </dl>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>Compara la tabla de búsquedas con «Cuántas personas hay en cada grupo». La silueta y los tamaños ayudan a ver por qué conviene hablar de una exploración en este grupo.</p></div>
+      <details class="study"><summary>¿Cómo salieron cuatro grupos si en la gráfica por k se ve mejor el dos?</summary><p>El dos fue el mayor punto al ajustar y medir con toda la muestra en esa gráfica. Para elegir la configuración final se apartaron respuestas por ronda y se puntuaron esas respuestas. En ese ejercicio, las dos búsquedas eligieron cuatro.</p></details>
+    </article>
+
+    <article class="sheet" id="documentacion">
+      <header><h2>Documentación</h2><p class="route">Menú izquierdo → <strong>Documentación</strong></p></header>
+      <p>El <strong>informe técnico</strong> explica cómo se limpiaron las encuestas y cómo se probaron los modelos. El <strong>informe de negocio</strong> reúne los indicadores, los hallazgos y lo que puede sostenerse con este grupo.</p>
+      <p>Usamos <strong>Streamlit</strong> porque el análisis ya estaba en Python y desde ahí podíamos hacer secciones, filtros y descargas. <strong>Altair</strong> permite pasar el cursor por las gráficas para ver las cifras.</p>
+      <div class="practice"><h3>Pruébalo en el tablero</h3><p>Abre <strong>«Cobertura y calidad de los datos»</strong>. Ahí aparecen las 18 columnas tratadas del formulario de IA y las 9 seleccionadas de bienestar. El notebook detalla qué hizo Python con cada campo.</p></div>
+      <details class="study"><summary>¿Qué podemos decir sobre el desempeño académico?</summary><p>Estos resultados describen hábitos y percepciones del grupo. Para estudiar si aprender o las calificaciones cambian por el uso de IA harían falta mediciones académicas independientes y más observaciones.</p></details>
+    </article>
   </main>
 </div>
-<script type="application/json" id="original-speech">{"11": ["El análisis ya estaba en Python. Con Streamlit pudimos usar los resultados para hacer una página que funciona en el navegador, con secciones, filtros y descargas. Quien quiera revisar un dato puede hacerlo sin abrir el notebook ni ejecutar el código.", "Las gráficas las hicimos con Altair. Por ejemplo, podemos pasar el cursor sobre una barra para ver la cifra o elegir qué herramientas quedan a la vista. Sirve para revisar varias preguntas con los mismos datos. Al usar un filtro cambiamos lo que se muestra en pantalla. El tablero carga los resultados ya calculados."], "12": ["Voy a abrir el tablero. Primero vemos de dónde salen los indicadores. Luego les muestro dónde quedaron las búsquedas de modelos y cómo leer la prueba de horas."], "Demo A": ["Estamos en Panorama. Arriba se ve el tiempo de uso diario, el uso mixto, el porcentaje que usa varias herramientas y el traslado. Se puede leer el dato rápido y revisar abajo de qué grupo salió.", "En herramientas, cambio a «Porcentaje». Las 15 menciones de Gemini ahora aparecen como 62.5 %. Son las mismas 15 personas entre 24 respuestas. Uso el conteo cuando quiero saber cuántas fueron y el porcentaje cuando quiero decir qué parte del grupo representan."], "Demo B": ["En Uso de IA elijo «Porcentaje» y quito una herramienta para comparar las barras que quedan. Gemini conserva su porcentaje porque la base sigue siendo de 24 respuestas. Es como tapar una fila de una tabla para leer mejor las demás.", "Ya en Entorno y bienestar, la base cambia a 19. Son quienes respondieron los dos formularios. Si alguien les señala dos cifras distintas, miren primero qué grupo se usó para calcular cada una."], "Demo C": ["En Modelos abro Clasificación y despliego la comparación de las búsquedas. Cada fila dice si se probaron todas las combinaciones elegidas o solo una selección, qué configuración quedó primero y qué F1 logró en validación.", "La prueba guardada se muestra aparte. Así podemos ver cómo le fue al KNN seleccionado y cómo le fue a la regla de decir siempre la categoría más común. Fíjense en el número de casos. Una diferencia aquí merece comprobarse con más respuestas."], "Demo D": ["Ahora cambio a Agrupación exploratoria. Aquí ya no hay una respuesta correcta que adivinar. En la tabla aparece el resultado de cada búsqueda. La silueta resume qué tan separados están los grupos. La gráfica de tamaños ayuda a ponerle contexto a esa puntuación. Si un grupo queda muy chico, en el tablero se muestra sin un perfil individual. Con 19 respuestas esto nos sirve para explorar parecidos."], "Demo E": ["En Regresión, las dos filas se calcularon con las mismas 6 respuestas guardadas. Al cambiar de R² a MAE, las barras muestran el error medio en horas. Son unos 48 minutos para la regresión y 38 para el promedio de entrenamiento. Para leer este gráfico, busquen la barra más corta."], "Demo F": ["En Documentación pueden descargar los dos informes. El técnico explica qué hizo el código y el de negocio reúne los indicadores y lo que podemos decir con ellos. Lo más común fue combinar ayuda para aprender con ganas de avanzar. Para saber si eso cambia las calificaciones harían falta otras mediciones. Gracias. ¿Tienen preguntas?"]}</script>
 <script>
-const localDashboard = 'http://localhost:8501/';
-const isLocal = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
-const dashboardLink = document.querySelector('#dashboard-main');
-const embed = document.querySelector('#embed');
-if (isLocal) {
-  dashboardLink.href = localDashboard;
-  dashboardLink.textContent = 'Abrir tablero local ↗';
-  embed.hidden = false;
+const local = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+if (local) {
+  const mainLink = document.querySelector('#dashboard-main');
+  mainLink.href = 'http://localhost:8501/';
+  mainLink.textContent = 'Abrir tablero local ↗';
+  document.querySelector('#dashboard-publico').hidden = false;
 }
 
-const spoken = JSON.parse(document.querySelector('#original-speech').textContent);
-const steps = [
-  {title:'Por qué elegimos Streamlit', at:'10:15–11:00', place:'Diapositiva 11', text:spoken['11'],
-   clicks:['Entra cuando termine la Persona 2. Avanza a la <kbd>diapositiva 11</kbd>.','Señala primero el recuadro de <kbd>Streamlit</kbd> y después el de <kbd>Altair</kbd>.','Avanza cerca de 11:00 al terminar la última frase.'],
-   see:'Dos recuadros con las herramientas que usamos. Streamlit organiza la página y Altair dibuja las gráficas.',
-   tip:'Ten listo el ejemplo de la barra: puedes elegir qué herramientas ver y pasar el cursor para que aparezca la cifra.'},
-  {title:'Veamos el tablero', at:'11:00–11:15', place:'Diapositiva 12', text:spoken['12'],
-   clicks:['Avanza una vez desde la diapositiva 11.','Di la frase y pulsa <kbd>Abrir tablero</kbd>.','Cuando cargue, ubica <kbd>Panorama</kbd> en el menú izquierdo.'],
-   see:'El botón abre el tablero público en la misma pestaña. La primera vista se titula «Así usan la IA los estudiantes».',
-   tip:'Puedes ensayar el tablero desde el botón de arriba de esta guía. Antes de exponer, abre el enlace público para que Streamlit tenga tiempo de cargar.'},
-  {title:'Panorama', at:'11:15–12:00', place:'Tablero · menú izquierdo', text:spoken['Demo A'],
-   clicks:['Señala las tarjetas de arriba: <kbd>Tiempo diario (mediana)</kbd>, uso mixto, uso de más de una herramienta y <kbd>Traslado (mediana)</kbd>.','Baja a <kbd>Las herramientas más mencionadas</kbd>.','Pulsa <kbd>Porcentaje</kbd> encima de las barras y señala <kbd>Gemini</kbd>.'],
-   see:'1.5 h de mediana diaria, 54.2 % de uso mixto y 54.2 % con dos herramientas o más. La mediana de traslado es de 60 min. Las 15 menciones de Gemini pasan a mostrarse como 62.5 %.',
-   tip:'La división es 15 ÷ 24. Cada persona podía mencionar varias herramientas. Por eso, si sumas todos los porcentajes de las barras pueden pasar de 100 %.'},
-  {title:'Uso de IA', at:'12:00–12:20 aprox.', place:'Tablero · menú izquierdo', text:spoken['Demo B'].slice(0,1),
-   clicks:['Entra en <kbd>Uso de IA</kbd>.','En <kbd>Herramientas de IA</kbd>, abre <kbd>Mostrar</kbd> y elige <kbd>Porcentaje</kbd>.','En <kbd>Herramientas</kbd>, pulsa la × de una herramienta distinta a <kbd>Gemini</kbd>.'],
-   see:'Desaparece una barra y Gemini conserva 62.5 %. El selector de porcentaje de esta pantalla es independiente del de Panorama.',
-   tip:'Puedes pensar en tapar una fila de una tabla para leer mejor las demás. El número de personas que respondieron sigue igual.'},
-  {title:'Entorno y bienestar', at:'12:20–12:40 aprox.', place:'Tablero · menú izquierdo', text:spoken['Demo B'].slice(1),
-   clicks:['Abre <kbd>Entorno y bienestar</kbd>.','Señala la tarjeta <kbd>Respondieron ambas encuestas</kbd>.','Baja a <kbd>Traslado y horas de IA</kbd> si quieres mostrar el cruce.'],
-   see:'19 de 24 contestaron ambos formularios. La mediana de traslado fue de 60 minutos.',
-   tip:'La comparación de traslado y horas de IA usa esos 19 pares. Vimos poca evidencia de una relación clara en las respuestas disponibles.'},
-  {title:'Clasificación', at:'12:40–13:25', place:'Tablero · Modelos → Clasificación', text:spoken['Demo C'],
-   clicks:['Entra a <kbd>Modelos</kbd> y elige <kbd>Clasificación</kbd>.','Abre <kbd>Ver GridSearchCV y RandomizedSearchCV</kbd> y señala las dos filas.','Baja más allá de <kbd>Comparación con configuraciones fijas</kbd> hasta <kbd>Prueba reservada</kbd>. En la tabla de al lado, señala la fila F1.'],
-   see:'La tabla describe las configuraciones y el F1 de validación. Para la prueba reservada, el F1 de KNN es 0.889, frente a 0.800 de la referencia.',
-   tip:'En validación, el mejor KNN tuvo un F1 de 0.627 y la referencia 0.713. La prueba final usó otras 6 respuestas. Explica por qué ambos resultados tienen sentido sin sacar conclusiones firmes con tan pocos casos.'},
-  {title:'Agrupación exploratoria', at:'13:25–14:05', place:'Tablero · Modelos → Agrupación exploratoria', text:spoken['Demo D'],
-   clicks:['En <kbd>Modelos</kbd>, cambia a <kbd>Agrupación exploratoria</kbd>.','Abre <kbd>Ver GridSearchCV y RandomizedSearchCV</kbd>. Señala la silueta de validación y el número de grupos de ambas filas.','Muestra <kbd>Cuántas personas hay en cada grupo</kbd>.'],
-   see:'La configuración elegida formó 4 grupos de 12, 5, 1 y 1 personas. La gráfica reúne los grupos muy pequeños en una sola barra.',
-   tip:'La silueta resume separación. Mira también cuántas personas quedaron en cada grupo antes de hablar de perfiles. Los grupos pequeños se muestran juntos para proteger las respuestas individuales.'},
-  {title:'Regresión de horas', at:'14:05–14:35', place:'Tablero · Modelos → Regresión (R²)', text:spoken['Demo E'],
-   clicks:['Cambia a <kbd>Regresión (R²)</kbd>.','Ubica <kbd>Comparación en las mismas respuestas de prueba</kbd>.','En el selector de la gráfica elige <kbd>MAE (horas)</kbd> y señala las dos barras.'],
-   see:'R² es −0.245 para la regresión y −0.064 para la referencia. Las barras de MAE muestran 0.808 y 0.634 horas. En MAE, una barra más corta indica menor error medio.',
-   tip:'La referencia predice el promedio de las 18 respuestas de entrenamiento. Los mismos 6 casos se reservaron para probar ambos modelos. 0.808 h equivalen a unos 48 min y 0.634 h a unos 38 min.',
-   table:true, extra:'Si preguntan por las entradas de la regresión, menciona el semestre en que empezó el uso de IA y la cantidad de herramientas. La predicción se expresa en horas de IA por día.'},
-  {title:'Documentación y cierre', at:'14:35–15:00', place:'Tablero · menú izquierdo', text:spoken['Demo F'],
-   clicks:['Abre <kbd>Documentación</kbd>.','Señala <kbd>Descargar informe técnico</kbd> y <kbd>Descargar informe de negocio</kbd>.','Di la conclusión y deja en pantalla los PDF para las preguntas.'],
-   see:'Dos PDF. El informe técnico reúne limpieza y evaluación. El de negocio reúne indicadores, hallazgos y límites.',
-   tip:'Recuerda el dato central: 13 de 24 describieron un uso mixto. Si te preguntan cómo comprobamos la limpieza, abre <kbd>Cobertura y calidad de los datos</kbd> en esta misma pantalla.'}
-];
-const metricTable = '<div class="tablescroll"><table><thead><tr><th>Modelo</th><th>R²</th><th>MAE</th><th>RMSE</th></tr></thead><tbody><tr><td>Regresión lineal</td><td>−0.245</td><td>0.808 h</td><td>1.039 h</td></tr><tr><td>Referencia (media)</td><td>−0.064</td><td>0.634 h</td><td>0.961 h</td></tr></tbody></table></div>';
-let active = 0;
-const panel = document.querySelector('#panel');
-const list = document.querySelector('#steps');
-const prev = document.querySelector('#previous');
-const next = document.querySelector('#next');
-
-function display(index, fromClick = false) {
-  active = Math.max(0, Math.min(steps.length - 1, index));
-  const step = steps[active];
-  list.replaceChildren(...steps.map((s, i) => {
-    const button = document.createElement('button');
-    button.className = 'step-btn';
-    button.type = 'button';
-    if (i === active) button.setAttribute('aria-current', 'step');
-    button.innerHTML = '<span class="num">' + (i + 1) + '</span><span>' + s.title + '</span><small>' + s.at + '</small>';
-    button.addEventListener('click', () => display(i, true));
-    return button;
-  }));
-  panel.innerHTML = '<div class="step-head"><p class="eyebrow">' + step.place + '</p><h2>' + step.title + '</h2><p>' + step.at + ' · Paso ' + (active + 1) + ' de ' + steps.length + '</p></div>'
-    + '<div class="step-body"><section><h3>Dónde ir</h3><ol>' + step.clicks.map(line => '<li>' + line + '</li>').join('')
-    + '</ol><p class="expected"><strong>Qué debe aparecer</strong><br>' + step.see + '</p>' + (step.table ? metricTable : '') + '</section>'
-    + '<section class="speech"><h3>Qué dices</h3></section></div><details><summary>Para estudiar este paso</summary><p>' + step.tip + '</p>'
-    + (step.extra ? '<p class="coaching">' + step.extra + '</p>' : '') + '</details>';
-  const speech = panel.querySelector('.speech');
-  for (const line of step.text) {
-    const paragraph = document.createElement('p');
-    paragraph.textContent = line;
-    speech.append(paragraph);
-  }
-  prev.disabled = active === 0;
-  next.disabled = active === steps.length - 1;
-  if (fromClick) {
-    history.replaceState(null, '', '#paso-' + (active + 1));
-    panel.focus({preventScroll: true});
-    panel.scrollIntoView({block: 'start'});
+const links = [...document.querySelectorAll('aside nav a')];
+function markSection() {
+  for (const link of links) {
+    if (link.hash === location.hash) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
   }
 }
-function readHash() {
-  const match = /^#paso-(\d+)$/.exec(location.hash);
-  display(match ? Number(match[1]) - 1 : 0);
-}
-prev.addEventListener('click', () => display(active - 1, true));
-next.addEventListener('click', () => display(active + 1, true));
-window.addEventListener('hashchange', readHash);
-readHash();
+window.addEventListener('hashchange', markSection);
+markSection();
 
-const clock = document.querySelector('#clock');
-const run = document.querySelector('#run');
-let clockStart = null, elapsed = 0;
-function drawClock() {
-  const seconds = Math.floor((elapsed + (clockStart === null ? 0 : performance.now() - clockStart)) / 1000);
-  clock.value = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+const cells = [...document.querySelectorAll('#matriz-knn td[data-hit]')];
+const counts = Object.fromEntries(cells.map(cell => [cell.dataset.hit, Number(cell.textContent)]));
+const {tn, fp, fn, tp} = counts;
+const total = tn + fp + fn + tp;
+const ratio = (numerator, denominator) => denominator ? (numerator / denominator).toFixed(3) : '0.000';
+const metrics = {
+  accuracy: {hits:['tn','tp'], note: (tn + tp) + ' de ' + total + ' aciertos. Suma las dos casillas de la diagonal y divide entre todos los casos.'},
+  precision: {hits:['fp','tp'], note: tp + ' de ' + (fp + tp) + ' predicciones mixtas fueron correctas. Precisión = ' + ratio(tp, fp + tp) + '.'},
+  recall: {hits:['fn','tp'], note: 'KNN reconoció ' + tp + ' de ' + (fn + tp) + ' casos mixtos reales. Recall = ' + ratio(tp, fn + tp) + '.'},
+  f1: {hits:['fp','fn','tp'], note: 'F1 = ' + ratio(2 * tp, 2 * tp + fp + fn) + '. Resume precisión y recall. Los errores que afectan a la clase mixta son los mixtos que se escaparon y los exclusivos marcados como mixtos.'},
+};
+const choices = [...document.querySelectorAll('[data-metric]')];
+const explanation = document.querySelector('#resultado-metrica');
+for (const button of choices) {
+  button.addEventListener('click', () => {
+    const metric = metrics[button.dataset.metric];
+    for (const choice of choices) choice.setAttribute('aria-pressed', String(choice === button));
+    for (const cell of cells) cell.toggleAttribute('data-active', metric.hits.includes(cell.dataset.hit));
+    explanation.textContent = metric.note;
+  });
 }
-run.addEventListener('click', () => {
-  if (clockStart === null) { clockStart = performance.now(); run.textContent = 'Pausar'; }
-  else { elapsed += performance.now() - clockStart; clockStart = null; run.textContent = 'Continuar'; }
-  drawClock();
-});
-document.querySelector('#reset').addEventListener('click', () => {
-  elapsed = 0; clockStart = null; run.textContent = 'Iniciar'; drawClock();
-});
-setInterval(drawClock, 250);
-
-const sandbox = document.querySelector('#sandbox');
-embed.addEventListener('click', () => {
-  if (!sandbox.firstElementChild) {
-    const frame = document.createElement('iframe');
-    frame.title = 'Tablero de IA en contexto para practicar';
-    frame.src = localDashboard;
-    sandbox.append(frame);
-  }
-  sandbox.hidden = !sandbox.hidden;
-  embed.setAttribute('aria-expanded', String(!sandbox.hidden));
-  embed.textContent = sandbox.hidden ? 'Mostrar tablero local aquí' : 'Ocultar tablero';
-});
 </script>
 </body>
 </html>
