@@ -7,6 +7,7 @@
 <style>
 :root{color-scheme:light;--ink:#172c39;--navy:#153044;--blue:#265973;--muted:#526574;--paper:#f6f1e5;--sheet:#fffdf6;--line:#ddd2bc;--gold:#f7e0a4;--bluewash:#e7f0f3;--shadow:0 5px 16px #4e3c2010}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.62 "Segoe UI",sans-serif}
 h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
 h1,h2{font-family:Georgia,serif;line-height:1.1;letter-spacing:-.032em}
@@ -28,8 +29,13 @@ header{background:var(--navy);color:var(--sheet);border-bottom:5px solid #c59d46
 .hero .button{color:var(--navy);background:var(--gold);border-color:var(--gold)}
 .hero .button:hover{background:#ffeab8}
 .hero .sub-link{color:#ecf3f7;font-size:.91rem}
-.layout{display:grid;grid-template-columns:211px minmax(0,1fr);align-items:start;gap:32px;padding:33px 0 55px}
-aside{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto}
+.view-strip{position:sticky;top:0;z-index:2;background:#efe7d4;border-bottom:1px solid var(--line)}
+.view-strip nav{display:flex;flex-wrap:wrap;gap:6px;padding:7px 0}
+.view-strip a{border-radius:4px;padding:.4rem .75rem;text-decoration:none;font-weight:650}
+.view-strip a:hover{background:#e3d8be}
+.view-strip a[aria-current="page"]{background:var(--navy);color:var(--sheet)}
+.layout{display:grid;grid-template-columns:211px minmax(0,1fr);align-items:start;gap:32px;padding:33px 0 55px;scroll-margin-top:65px}
+aside{position:sticky;top:70px;max-height:calc(100vh - 88px);overflow:auto}
 aside nav ul{padding:0;list-style:none}
 aside a{display:block;padding:5px 8px;border-left:2px solid var(--line);text-decoration:none;color:var(--ink)}
 aside a:hover,aside a[aria-current="location"]{border-color:#9a6e25;background:#eee4cc}
@@ -37,7 +43,7 @@ aside .kicker{margin-top:15px}
 aside .kicker:first-child{margin-top:0}
 aside .back{font-size:.88rem;margin-top:17px}
 main{min-width:0}
-.sheet{position:relative;scroll-margin-top:18px;padding:clamp(18px,4vw,32px);border:1px solid var(--line);border-top:3px solid #b8995a;background:var(--sheet);box-shadow:var(--shadow);border-radius:6px;margin-bottom:19px}
+.sheet{position:relative;scroll-margin-top:65px;padding:clamp(18px,4vw,32px);border:1px solid var(--line);border-top:3px solid #b8995a;background:var(--sheet);box-shadow:var(--shadow);border-radius:6px;margin-bottom:19px}
 .sheet.model{border-top-color:var(--blue)}
 .sheet:target{border-color:var(--blue)}
 .sheet>header{background:none;color:inherit;border:0;padding:0;margin-bottom:13px}
@@ -62,6 +68,7 @@ summary{font-weight:700;color:var(--blue)}
 .choice button:hover{background:var(--bluewash)}
 .choice button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:white}
 .table-wrap{overflow-x:auto;margin-top:9px}
+#cls-matriz{scroll-margin-top:65px}
 table{width:100%;border-collapse:collapse;text-align:left;font-size:.92rem;font-variant-numeric:tabular-nums}
 th,td{padding:.48rem .64rem;border:1px solid var(--line)}
 thead th{background:#f3ebd4}
@@ -69,9 +76,24 @@ td[data-hit]{font-weight:700;text-align:center}
 td[data-active]{background:var(--bluewash);box-shadow:inset 0 0 0 2px var(--blue)}
 output{display:block;margin-top:8px;min-height:3.55em;color:var(--ink);font-size:.92rem}
 small{font-size:.86rem;color:var(--muted)}
+.walk-intro{margin-bottom:17px}
+.walk-intro p{color:var(--muted);max-width:70ch}
+.walk-step{border-top-color:var(--blue)}
+.walk-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:8px;font-size:.82rem;font-weight:700;color:var(--blue)}
+.walk-meta span:first-child{background:var(--gold);color:var(--navy);border-radius:3px;padding:2px 7px}
+.walk-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:17px;align-items:start}
+.walk-cues,.walk-voice{padding:13px 15px;border-radius:4px}
+.walk-cues{background:#f4ecd6}
+.walk-voice{background:#edf3f5;border-left:3px solid var(--blue)}
+.walk-voice p{font-size:1.03rem}
+.walk-controls{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.walk-controls [rel="next"]{margin-inline-start:auto}
+.button.back-button{background:transparent;color:var(--blue)}
+.button.back-button:hover{background:var(--bluewash)}
 @media(max-width:780px){.wrap{width:calc(100% - 36px)}.layout{grid-template-columns:152px minmax(0,1fr);gap:17px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:780px){.walk-body{grid-template-columns:1fr;gap:10px}}
 @media(max-width:600px){.hero,.layout{grid-template-columns:1fr}.hero-actions{flex-direction:row;flex-wrap:wrap;align-items:center}.layout{padding-top:20px}aside{position:static;max-height:none}aside nav ul{display:flex;flex-wrap:wrap;gap:5px}aside nav a{border:1px solid var(--line);background:var(--sheet);padding:3px 8px;border-radius:4px;font-size:.9rem}aside .back{display:none}.definition{grid-template-columns:1fr;gap:2px}.definition dt:not(:first-child){margin-top:6px}th,td{padding:.43rem}}
-@media print{header{background:white;color:var(--ink);border-color:var(--line)}.hero p:not(.kicker){color:var(--muted)}.layout{display:block}aside,.hero-actions,.choice{display:none}.sheet{box-shadow:none;break-inside:avoid}}
+@media print{header{background:white;color:var(--ink);border-color:var(--line)}.hero p:not(.kicker){color:var(--muted)}.layout{display:block}aside,.hero-actions,.choice,.view-strip,.walk-controls{display:none}.sheet{box-shadow:none;break-inside:avoid}#presentar:not([hidden]) [data-walk-step][hidden]{display:block!important}}
 </style>
 </head>
 <body id="inicio">
@@ -89,7 +111,13 @@ small{font-size:.86rem;color:var(--muted)}
     </div>
   </div>
 </header>
-<div class="wrap layout">
+<div class="view-strip">
+  <nav class="wrap" aria-label="Vistas de la Persona 3">
+    <a id="link-estudio" href="#estudio" aria-current="page">Guía de estudio</a>
+    <a id="link-recorrido" href="#presentar">Recorrido hablado</a>
+  </nav>
+</div>
+<div class="wrap layout" id="estudio" tabindex="-1">
   <aside>
     <nav aria-label="Secciones de estudio">
       <p class="kicker">En el menú del tablero</p>
@@ -242,6 +270,90 @@ small{font-size:.86rem;color:var(--muted)}
     </article>
   </main>
 </div>
+<div class="wrap layout" id="presentar" tabindex="-1" hidden>
+  <aside>
+    <nav aria-label="Pasos del recorrido hablado">
+      <p class="kicker">Orden de la demo</p>
+      <ul>
+        <li><a href="#presentar-panorama">1. Panorama</a></li>
+        <li><a href="#presentar-uso">2. Uso de IA</a></li>
+        <li><a href="#presentar-entorno">3. Entorno y bienestar</a></li>
+        <li><a href="#presentar-knn">4. Clasificación</a></li>
+        <li><a href="#presentar-kmeans">5. Agrupación</a></li>
+        <li><a href="#presentar-regresion">6. Regresión</a></li>
+        <li><a href="#presentar-cierre">7. Documentación y cierre</a></li>
+      </ul>
+    </nav>
+    <a class="back" href="#estudio">← Guía de estudio</a>
+  </aside>
+  <main aria-labelledby="titulo-recorrido">
+    <div class="walk-intro">
+      <h2 id="titulo-recorrido">Recorrido hablado</h2>
+      <p>La demo empieza en la diapositiva 12, al minuto <strong>11:15</strong>. Tienes unos <strong>3 min 45 s</strong> con el tablero. Mantén esta vista en otra pestaña y avanza un paso al cambiar de pantalla.</p>
+    </div>
+
+    <article class="sheet walk-step" id="presentar-panorama" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>1 de 7</span><span>11:15–12:00</span></div><h2>Panorama</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>En la diapositiva 12, pulsa <strong>Abrir tablero</strong>.</li><li>En <strong>Panorama</strong>, señala el tiempo diario y el uso mixto.</li><li>En la gráfica de herramientas, cambia a <strong>Porcentaje</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>En la encuesta de IA participaron 24 personas. Si ordenamos sus tiempos de uso, en el centro queda una hora y media al día. También vimos que 13 personas dijeron usar la IA de las dos formas, para entender temas y para avanzar más rápido con las tareas. En estas barras podemos ver qué herramientas mencionaron.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-uso" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>2 de 7</span><span>12:00–12:20</span></div><h2>Uso de IA</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Uso de IA</strong>.</li><li>En <strong>Mostrar</strong>, elige <strong>Porcentaje</strong>.</li><li>Quita otra herramienta del filtro y conserva Gemini.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Gemini fue la más mencionada. Aparece en 15 de 24 respuestas. Fíjense qué pasa si quito otra herramienta de la gráfica. Desaparece una barra, pero Gemini sigue en 62.5 por ciento porque la base sigue siendo la encuesta completa.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-entorno" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>3 de 7</span><span>12:20–12:40</span></div><h2>Entorno y bienestar</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Entorno y bienestar</strong>.</li><li>Señala <strong>Respondieron ambas encuestas</strong> y luego <strong>Traslado y horas de IA</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Para comparar traslado y horas de IA necesitamos los dos datos de cada persona. Por eso aquí quedan 19 respuestas. La correlación salió cerca de cero. Con esta muestra, la relación queda por confirmar.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-knn" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>4 de 7</span><span>12:40–13:25</span></div><h2>Clasificación con KNN</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Modelos → Clasificación</strong>.</li><li>Despliega <strong>Ver GridSearchCV y RandomizedSearchCV</strong>.</li><li>Baja a <strong>Prueba reservada</strong> y señala la diagonal de la matriz.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Queríamos distinguir uso mixto de exclusivo. KNN busca las respuestas más parecidas y deja que voten las 3 más cercanas.</p><p>Una búsqueda probó 16 combinaciones y la otra, 8 al azar. Las comparamos con F1, que resume qué tan bien identificamos los casos mixtos. En validación ganó la regla de decir siempre «mixto». En las 6 respuestas guardadas, KNN acertó 5 y esa regla 4. La ventaja fue un solo acierto.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-kmeans" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>5 de 7</span><span>13:25–14:05</span></div><h2>Agrupación con K-Means</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Cambia a <strong>Agrupación exploratoria</strong>.</li><li>Abre <strong>Ver GridSearchCV y RandomizedSearchCV</strong> y señala cuántos grupos eligieron.</li><li>Muestra <strong>Cuántas personas hay en cada grupo</strong>. La barra de grupos pequeños junta los dos casos aislados.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Ahora buscamos qué respuestas se parecen entre sí. Imaginen que acomodamos fichas en montones según datos como las horas de IA o el traslado. Las dos búsquedas eligieron 4 grupos. Cuando vemos los tamaños, quedaron 12, 5, 1 y 1 personas por grupo. La silueta nos dice qué tan separados están. Salió baja, así que hablamos de una exploración de esta muestra.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-regresion" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>6 de 7</span><span>14:05–14:35</span></div><h2>Regresión y R²</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Regresión (R²)</strong> y señala el R² de la tabla.</li><li>Cambia el selector a <strong>MAE (horas)</strong>.</li><li>Compara las dos barras de error.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Para estimar las horas diarias usamos el semestre de inicio y cuántas herramientas mencionaron. El R² salió negativo y el ajuste fue pobre. Al ver el error en minutos, la regresión se desvió unos 48 en promedio. Usando el promedio de entrenamiento, fueron 38. En estos casos, la regla más sencilla se acercó más.</p></section>
+      </div>
+    </article>
+
+    <article class="sheet walk-step" id="presentar-cierre" data-walk-step tabindex="-1">
+      <header><div class="walk-meta"><span>7 de 7</span><span>14:35–15:00</span></div><h2>Documentación y cierre</h2></header>
+      <div class="walk-body">
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Documentación</strong> y señala los dos PDF.</li><li>Deja el tablero abierto. Si preguntan por la limpieza, despliega <strong>Cobertura y calidad de los datos</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3><p>En el informe técnico está cómo trabajamos los datos y cómo evaluamos los modelos. En el de negocio pueden revisar los indicadores. Lo que vimos aquí describe cómo usa la IA el grupo que respondió. Para saber si cambia el aprendizaje, tendríamos que medirlo directamente. Gracias.</p></section>
+      </div>
+    </article>
+
+    <nav class="walk-controls" aria-label="Paso anterior y siguiente">
+      <a class="button back-button" id="paso-anterior" rel="prev" href="#presentar-panorama">← Anterior</a>
+      <a class="button" id="paso-siguiente" rel="next" href="#presentar-uso">Siguiente →</a>
+    </nav>
+  </main>
+</div>
 <script>
 const local = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 if (local) {
@@ -251,15 +363,48 @@ if (local) {
   document.querySelector('#dashboard-publico').hidden = false;
 }
 
-const links = [...document.querySelectorAll('aside nav a')];
-function markSection() {
-  for (const link of links) {
-    if (link.hash === location.hash) link.setAttribute('aria-current', 'location');
+const studyView = document.querySelector('#estudio');
+const walkView = document.querySelector('#presentar');
+const stepCards = [...walkView.querySelectorAll('[data-walk-step]')];
+const sectionLinks = [...document.querySelectorAll('aside nav a')];
+const viewLinks = [...document.querySelectorAll('.view-strip a')];
+const previous = document.querySelector('#paso-anterior');
+const next = document.querySelector('#paso-siguiente');
+
+function showView(moveFocus = false) {
+  const fragment = location.hash.slice(1);
+  const stepIndex = stepCards.findIndex(card => card.id === fragment);
+  const showWalk = fragment === 'presentar' || stepIndex >= 0;
+  walkView.hidden = !showWalk;
+  studyView.hidden = showWalk;
+  const viewHash = showWalk ? '#presentar' : '#estudio';
+  for (const link of viewLinks) {
+    if (link.hash === viewHash) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
+
+  const current = Math.max(0, stepIndex);
+  const active = showWalk ? stepCards[current].id : fragment;
+  for (const link of sectionLinks) {
+    if (link.hash === '#' + active) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  }
+  if (showWalk) {
+    stepCards.forEach((card, index) => { card.hidden = index !== current; });
+    previous.hidden = current === 0;
+    if (current > 0) previous.href = '#' + stepCards[current - 1].id;
+    const following = stepCards[current + 1];
+    next.href = following ? '#' + following.id : '#presentar';
+    next.textContent = following ? 'Siguiente →' : 'Volver al inicio';
+  }
+  if (moveFocus && (showWalk || fragment === 'estudio')) {
+    const anchor = document.getElementById(fragment);
+    anchor.focus({preventScroll:true});
+    anchor.scrollIntoView({block:'start'});
+  }
 }
-window.addEventListener('hashchange', markSection);
-markSection();
+window.addEventListener('hashchange', () => showView(true));
+showView();
 
 const cells = [...document.querySelectorAll('#matriz-knn td[data-hit]')];
 const counts = Object.fromEntries(cells.map(cell => [cell.dataset.hit, Number(cell.textContent)]));
