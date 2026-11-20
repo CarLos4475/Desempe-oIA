@@ -78,6 +78,12 @@ output{display:block;margin-top:8px;min-height:3.55em;color:var(--ink);font-size
 small{font-size:.86rem;color:var(--muted)}
 .walk-intro{margin-bottom:17px}
 .walk-intro p{color:var(--muted);max-width:70ch}
+.walk-modes{display:flex;flex-wrap:wrap;gap:8px 14px;border:0;padding:0;margin:12px 0 0;color:var(--ink)}
+.walk-modes legend{font-size:.85rem;font-weight:700;margin-bottom:4px;padding:0}
+.walk-modes label{display:inline-flex;align-items:center;gap:5px;padding:.25rem .5rem;border:1px solid var(--line);border-radius:4px;background:var(--sheet);cursor:pointer;font-size:.9rem}
+.walk-modes label:has(input:checked){border-color:var(--blue);background:var(--bluewash)}
+.walk-modes input{margin:0;accent-color:var(--blue)}
+#presentar:not([data-breve]) .walk-time,#presentar[data-breve] .walk-more{display:none}
 .walk-step{border-top-color:var(--blue)}
 .walk-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:8px;font-size:.82rem;font-weight:700;color:var(--blue)}
 .walk-meta span:first-child{background:var(--gold);color:var(--navy);border-radius:3px;padding:2px 7px}
@@ -93,7 +99,7 @@ small{font-size:.86rem;color:var(--muted)}
 @media(max-width:780px){.wrap{width:calc(100% - 36px)}.layout{grid-template-columns:152px minmax(0,1fr);gap:17px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:780px){.walk-body{grid-template-columns:1fr;gap:10px}}
 @media(max-width:600px){.hero,.layout{grid-template-columns:1fr}.hero-actions{flex-direction:row;flex-wrap:wrap;align-items:center}.layout{padding-top:20px}aside{position:static;max-height:none}aside nav ul{display:flex;flex-wrap:wrap;gap:5px}aside nav a{border:1px solid var(--line);background:var(--sheet);padding:3px 8px;border-radius:4px;font-size:.9rem}aside .back{display:none}.definition{grid-template-columns:1fr;gap:2px}.definition dt:not(:first-child){margin-top:6px}th,td{padding:.43rem}}
-@media print{header{background:white;color:var(--ink);border-color:var(--line)}.hero p:not(.kicker){color:var(--muted)}.layout{display:block}aside,.hero-actions,.choice,.view-strip,.walk-controls{display:none}.sheet{box-shadow:none;break-inside:avoid}#presentar:not([hidden]) [data-walk-step][hidden]{display:block!important}}
+@media print{header{background:white;color:var(--ink);border-color:var(--line)}.hero p:not(.kicker){color:var(--muted)}.layout{display:block}aside,.hero-actions,.choice,.view-strip,.walk-controls,.walk-modes{display:none}.sheet{box-shadow:none;break-inside:avoid}#presentar:not([hidden]) [data-walk-step][hidden]{display:block!important}}
 </style>
 </head>
 <body id="inicio">
@@ -289,62 +295,115 @@ small{font-size:.86rem;color:var(--muted)}
   <main aria-labelledby="titulo-recorrido">
     <div class="walk-intro">
       <h2 id="titulo-recorrido">Recorrido hablado</h2>
-      <p>La demo empieza en la diapositiva 12, al minuto <strong>11:15</strong>. Tienes unos <strong>3 min 45 s</strong> con el tablero. Mantén esta vista en otra pestaña y avanza un paso al cambiar de pantalla.</p>
+      <p>La demo empieza en la diapositiva 12, al minuto <strong>11:15</strong>. El recorrido completo explica cada gráfica y métrica. Para ensayar los <strong>3 min 45 s</strong> de la exposición, elige la versión breve.</p>
+      <fieldset class="walk-modes" id="duracion-recorrido">
+        <legend>Versión del recorrido</legend>
+        <label><input type="radio" name="version-recorrido" value="completa" checked> Completa</label>
+        <label><input type="radio" name="version-recorrido" value="breve"> Breve · 3:45</label>
+      </fieldset>
     </div>
 
     <article class="sheet walk-step" id="presentar-panorama" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>1 de 7</span><span>11:15–12:00</span></div><h2>Panorama</h2></header>
+      <header><div class="walk-meta"><span>1 de 7</span><span class="walk-time">11:15–12:00</span></div><h2>Panorama</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>En la diapositiva 12, pulsa <strong>Abrir tablero</strong>.</li><li>En <strong>Panorama</strong>, señala el tiempo diario y el uso mixto.</li><li>En la gráfica de herramientas, cambia a <strong>Porcentaje</strong>.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>En la encuesta de IA participaron 24 personas. Si ordenamos sus tiempos de uso, en el centro queda una hora y media al día. También vimos que 13 personas dijeron usar la IA de las dos formas, para entender temas y para avanzar más rápido con las tareas. En estas barras podemos ver qué herramientas mencionaron.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>En la diapositiva 12, pulsa <strong>Abrir tablero</strong>.</li><li>En <strong>Panorama</strong>, recorre las tarjetas.</li><li>En la gráfica de herramientas, cambia a <strong>Porcentaje</strong>.</li><li class="walk-more">Señala el segmento más grande de <strong>¿Guía, atajo o ambas?</strong> y la nota de quiénes contestaron.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>En la encuesta de IA participaron 24 personas. Si ordenamos sus tiempos de uso, en el centro queda una hora y media al día. También vimos que 13 personas dijeron usar la IA de las dos formas, para entender temas y para avanzar más rápido con las tareas.</p>
+          <p class="walk-more">Las dos tarjetas de aquí tienen el mismo porcentaje, 54.2 por ciento. Una cuenta el propósito y la otra cuenta cuánta gente mencionó dos herramientas o más. Puedes usar una sola herramienta para las dos cosas, así que son dos preguntas distintas.</p>
+          <p class="walk-more">Al lado está la mediana de traslado, 60 minutos. Ahí la base baja a 19 porque son quienes contestaron ambos formularios. Fíjense en el número de respuestas debajo de cada tarjeta. Esa es la base de la cifra que estamos leyendo.</p>
+          <p>Ahora podemos pasar de cuánta gente mencionó cada herramienta a qué porcentaje representa.</p>
+          <p class="walk-more">En las barras una persona puede aparecer varias veces si mencionó varias herramientas. En el círculo cada respuesta tiene una sola modalidad. El segmento mayor es el del uso mixto, que es el mismo dato de la tarjeta de arriba.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-uso" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>2 de 7</span><span>12:00–12:20</span></div><h2>Uso de IA</h2></header>
+      <header><div class="walk-meta"><span>2 de 7</span><span class="walk-time">12:00–12:20</span></div><h2>Uso de IA</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Uso de IA</strong>.</li><li>En <strong>Mostrar</strong>, elige <strong>Porcentaje</strong>.</li><li>Quita otra herramienta del filtro y conserva Gemini.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Gemini fue la más mencionada. Aparece en 15 de 24 respuestas. Fíjense qué pasa si quito otra herramienta de la gráfica. Desaparece una barra, pero Gemini sigue en 62.5 por ciento porque la base sigue siendo la encuesta completa.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Uso de IA</strong> y muestra las herramientas principales.</li><li>En <strong>Mostrar</strong>, elige <strong>Porcentaje</strong>. Quita otra herramienta del filtro y conserva Gemini.</li><li class="walk-more">Baja a <strong>Cómo dicen usar la IA</strong> y a <strong>Desde qué semestre la usan</strong>.</li><li class="walk-more">Termina en <strong>De qué hablan las respuestas</strong>. Señala los términos que tienen mayor peso.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>Gemini fue la más mencionada. Aparece en 15 de 24 respuestas. Fíjense qué pasa si quito otra herramienta. Desaparece una barra, pero Gemini sigue en 62.5 por ciento porque la base sigue siendo la encuesta completa.</p>
+          <p class="walk-more">También podemos comparar con ChatGPT, que tuvo 11 menciones, y Claude, que tuvo 8. Si elijo ordenar por nombre, se reacomodan las barras. Si elijo «Mayor uso», vuelve a quedar arriba la herramienta con más menciones.</p>
+          <p class="walk-more">En «Cómo dicen usar la IA» ya vemos el propósito. Hubo 13 respuestas de uso mixto, 7 de quienes la usan como guía y 2 de quienes la usan como atajo. Las respuestas del tipo «depende» y las que quedaron ambiguas aparecen por separado. Dejarlas visibles evita forzarlas a una categoría.</p>
+          <p class="walk-more">A la derecha está el semestre en que empezaron a usar IA. Tercero tiene la barra más alta, con 8 respuestas, y cuarto le sigue con 7. Ese semestre viene de lo que recordó cada persona al contestar.</p>
+          <p class="walk-more">Abajo dice TF-IDF. Es una manera de destacar términos de las respuestas abiertas. Aquí aparecen «rápido», «tiempo» e «información». El largo de la barra representa un peso que calcula el método. Sirve para ubicar temas y luego revisar en qué contexto se mencionaron.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-entorno" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>3 de 7</span><span>12:20–12:40</span></div><h2>Entorno y bienestar</h2></header>
+      <header><div class="walk-meta"><span>3 de 7</span><span class="walk-time">12:20–12:40</span></div><h2>Entorno y bienestar</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Entorno y bienestar</strong>.</li><li>Señala <strong>Respondieron ambas encuestas</strong> y luego <strong>Traslado y horas de IA</strong>.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Para comparar traslado y horas de IA necesitamos los dos datos de cada persona. Por eso aquí quedan 19 respuestas. La correlación salió cerca de cero. Con esta muestra, la relación queda por confirmar.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Entorno y bienestar</strong> y señala <strong>Respondieron ambas encuestas</strong>.</li><li class="walk-more">En <strong>Cuánto tiempo les toma trasladarse</strong>, muestra la caja y la marca dorada.</li><li>Ubica <strong>Traslado y horas de IA</strong>.</li><li class="walk-more">Pasa por <strong>Relaciones entre las variables</strong> y abre <strong>Qué significa la puntuación del texto</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>Para comparar traslado y horas de IA necesitamos los dos datos de cada persona. Por eso aquí quedan 19 respuestas.</p>
+          <p class="walk-more">Hay 5 personas sobre las que sí tenemos datos de IA y cuyo entorno quedó sin observar. Entre quienes contestaron ambas encuestas, la mediana de traslado fue de 60 minutos y 2 personas reportaron más de hora y media.</p>
+          <p class="walk-more">En la gráfica de traslado, la línea recorre todos los tiempos declarados. La caja va de 35 a 75 minutos y ahí cae la mitad central del grupo. La marca dorada es la mediana. Así podemos ver dónde se juntan la mayoría de los tiempos del centro, además de ver qué tan lejos llegan los extremos.</p>
+          <p>La correlación entre traslado y horas de IA salió cerca de cero. Con esta muestra, la relación queda por confirmar.</p>
+          <p class="walk-more">A eso se refiere el 0.137 que sale junto a la letra rho. Es una tendencia positiva débil. El valor p de 0.575 tampoco da evidencia clara de una asociación. En la matriz de colores hacemos esa misma comparación para otros pares. Por ejemplo, pueden ubicar horas de IA y edad y ver el valor al pasar el cursor.</p>
+          <p class="walk-more">Cuando aparece «polaridad», estamos viendo una puntuación que sale de las palabras de las respuestas. Un cero puede salir porque el código no reconoció palabras de su vocabulario. Lo leemos como una pista sobre el texto, con ese límite.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-knn" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>4 de 7</span><span>12:40–13:25</span></div><h2>Clasificación con KNN</h2></header>
+      <header><div class="walk-meta"><span>4 de 7</span><span class="walk-time">12:40–13:25</span></div><h2>Clasificación con KNN</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Modelos → Clasificación</strong>.</li><li>Despliega <strong>Ver GridSearchCV y RandomizedSearchCV</strong>.</li><li>Baja a <strong>Prueba reservada</strong> y señala la diagonal de la matriz.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Queríamos distinguir uso mixto de exclusivo. KNN busca las respuestas más parecidas y deja que voten las 3 más cercanas.</p><p>Una búsqueda probó 16 combinaciones y la otra, 8 al azar. Las comparamos con F1, que resume qué tan bien identificamos los casos mixtos. En validación ganó la regla de decir siempre «mixto». En las 6 respuestas guardadas, KNN acertó 5 y esa regla 4. La ventaja fue un solo acierto.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Modelos → Clasificación</strong>.</li><li class="walk-more">Señala cuántos casos se usaron para entrenar, validar y hacer la prueba.</li><li>Despliega <strong>Ver GridSearchCV y RandomizedSearchCV</strong>.</li><li class="walk-more">Baja a <strong>Comparación con configuraciones fijas</strong> y ubica el selector <strong>F1 / Accuracy</strong>.</li><li>Baja a <strong>Prueba reservada</strong> y señala la diagonal de la matriz.</li><li class="walk-more">En la tabla de al lado, señala <strong>Precisión</strong>, <strong>Recall</strong> y <strong>F1</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>Queríamos distinguir uso mixto de exclusivo. KNN busca las respuestas más parecidas y deja que voten las 3 más cercanas.</p>
+          <p class="walk-more">Si dos de esos vecinos dijeron «mixto» y el otro dijo «exclusivo», se predice mixto. Para decidir quién queda cerca usamos pistas como horas de IA y cantidad de herramientas, con las escalas ajustadas. La respuesta que nos dice la modalidad queda guardada para comprobar qué tanto acertamos.</p>
+          <p class="walk-more">De las 24 respuestas, 22 tenían una modalidad clara. Apartamos 6 para la prueba final. Entre las 16 de entrenamiento hicimos 5 rondas de validación. En cada una cambiamos qué parte quedaba para revisar. Así elegimos la configuración antes de mirar la prueba final.</p>
+          <p>Una búsqueda probó 16 combinaciones y la otra, 8 al azar. Las comparamos con F1, que resume qué tan bien identificamos los casos mixtos. En validación ganó la regla de decir siempre «mixto».</p>
+          <p class="walk-more">En la tabla, la primera búsqueda es la cuadrícula y la segunda toma una selección al azar. Entre las opciones cambiamos cuántos vecinos votaban, cómo medíamos su cercanía y cuánto pesaba cada voto. El mejor KNN dio F1 de 0.627 en validación. La regla sencilla dio 0.713.</p>
+          <p class="walk-more">Las barras de más abajo comparan modelos con parámetros fijos, entre ellos el KNN inicial. Las rayitas muestran cuánto cambió el resultado entre rondas. Ahora voy a bajar a la matriz, que sí es del KNN que ajustamos con las búsquedas.</p>
+          <p>En las 6 respuestas guardadas, KNN acertó 5 y la regla de decir siempre «mixto» acertó 4. La ventaja fue un solo acierto.</p>
+          <p class="walk-more">En la diagonal hay un exclusivo y cuatro mixtos correctos. De las cinco veces que KNN dijo «mixto», acertó cuatro. Eso es la precisión. Encontró los cuatro mixtos que de verdad había. Eso es el recall. El F1 combina las dos cosas y dio 0.889. Con seis casos, cambiar un acierto mueve bastante el resultado.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-kmeans" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>5 de 7</span><span>13:25–14:05</span></div><h2>Agrupación con K-Means</h2></header>
+      <header><div class="walk-meta"><span>5 de 7</span><span class="walk-time">13:25–14:05</span></div><h2>Agrupación con K-Means</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Cambia a <strong>Agrupación exploratoria</strong>.</li><li>Abre <strong>Ver GridSearchCV y RandomizedSearchCV</strong> y señala cuántos grupos eligieron.</li><li>Muestra <strong>Cuántas personas hay en cada grupo</strong>. La barra de grupos pequeños junta los dos casos aislados.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Ahora buscamos qué respuestas se parecen entre sí. Imaginen que acomodamos fichas en montones según datos como las horas de IA o el traslado. Las dos búsquedas eligieron 4 grupos. Cuando vemos los tamaños, quedaron 12, 5, 1 y 1 personas por grupo. La silueta nos dice qué tan separados están. Salió baja, así que hablamos de una exploración de esta muestra.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Cambia a <strong>Agrupación exploratoria</strong>.</li><li>Abre <strong>Ver GridSearchCV y RandomizedSearchCV</strong> y señala cuántos grupos eligieron.</li><li class="walk-more">Compara la silueta de la tabla con <strong>Silueta en la muestra</strong> y la gráfica <strong>Exploración del número de grupos</strong>.</li><li>Muestra <strong>Cuántas personas hay en cada grupo</strong>. La barra de grupos pequeños junta los dos casos aislados.</li><li class="walk-more">Vuelve a la tarjeta <strong>Varianza PCA</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>Ahora buscamos qué respuestas se parecen entre sí. Imaginen que acomodamos fichas en montones según datos como las horas de IA o el traslado.</p>
+          <p class="walk-more">K-Means empieza con un centro por grupo. Acomoda cada ficha en el grupo cuyo centro le queda más cerca y vuelve a calcular ese centro. Aquí la k dice cuántos montones queremos probar. En KNN, la k decía cuántos vecinos iban a votar.</p>
+          <p>Las dos búsquedas eligieron 4 grupos.</p>
+          <p class="walk-more">La cuadrícula probó 16 combinaciones y la búsqueda al azar, 8. La puntuación media fue 0.196. Se llama silueta y toma en cuenta qué tan cerca quedan los casos de su grupo y qué tan lejos de los demás. Probamos cada configuración en 3 rondas, dejando respuestas aparte en cada una.</p>
+          <p class="walk-more">En la gráfica de abajo parece que dos grupos salen mejor. Ahí ajustamos y medimos en toda la muestra con parámetros fijos. El cuatro viene de revisar respuestas apartadas en validación. La tarjeta de arriba da la silueta de esos cuatro grupos ya formados con los 19 casos, que fue 0.110.</p>
+          <p>Cuando vemos los tamaños, quedaron 12, 5, 1 y 1 personas por grupo. La silueta salió baja. Eso nos sirve para explorar parecidos entre estas respuestas y deja abierta la pregunta de si los grupos se repetirían.</p>
+          <p class="walk-more">La última tarjeta dice «Varianza PCA». Imaginen que intentamos resumir todos los datos en dos ejes para poder dibujarlos. En ese resumen se conserva cerca de 49.5 por ciento de la variación. Esa cifra habla de cuánto conserva el dibujo.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-regresion" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>6 de 7</span><span>14:05–14:35</span></div><h2>Regresión y R²</h2></header>
+      <header><div class="walk-meta"><span>6 de 7</span><span class="walk-time">14:05–14:35</span></div><h2>Regresión y R²</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Regresión (R²)</strong> y señala el R² de la tabla.</li><li>Cambia el selector a <strong>MAE (horas)</strong>.</li><li>Compara las dos barras de error.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>Para estimar las horas diarias usamos el semestre de inicio y cuántas herramientas mencionaron. El R² salió negativo y el ajuste fue pobre. Al ver el error en minutos, la regresión se desvió unos 48 en promedio. Usando el promedio de entrenamiento, fueron 38. En estos casos, la regla más sencilla se acercó más.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Abre <strong>Regresión (R²)</strong> y señala el R² de la tabla.</li><li>Cambia el selector a <strong>MAE (horas)</strong> y compara las barras.</li><li class="walk-more">Cambia a <strong>RMSE (horas)</strong> y abre <strong>Validación, partición y límites del ejercicio</strong>.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>Para estimar las horas diarias usamos el semestre de inicio y cuántas herramientas mencionaron. El R² salió negativo y el ajuste fue pobre.</p>
+          <p class="walk-more">En la tabla comparamos dos maneras de predecir las horas. Una usa esas dos pistas. La otra pone a todos el mismo número, que es el promedio aprendido con 18 respuestas. A ambas les pedimos estimar las mismas 6 respuestas que apartamos.</p>
+          <p class="walk-more">El R² de la regresión es −0.245 y el de la referencia es −0.064. El cero de R² se calcula con la media de las horas reales en la prueba. Nuestro modelo de referencia usó el promedio de entrenamiento. Como son dos promedios distintos, incluso esa regla puede quedar por debajo de cero.</p>
+          <p>Al ver el error en minutos, la regresión se desvió unos 48 en promedio. Usando el promedio de entrenamiento, fueron 38. En estos casos, la regla más sencilla se acercó más.</p>
+          <p class="walk-more">Ese es el MAE. Cuenta cuánto le faltó o cuánto se pasó cada predicción, y luego promedia esas diferencias en valor absoluto. El RMSE también se expresa en horas y le da más peso a los errores grandes. Si cambio a ese indicador, la barra de la referencia también queda más corta.</p>
+          <p class="walk-more">En el desplegable de validación se ve cómo variaron las cifras cuando cambiamos las respuestas para revisar el modelo. Con tan pocos casos, las métricas pueden moverse bastante. Por eso la conclusión se limita a esta prueba.</p>
+        </section>
       </div>
     </article>
 
     <article class="sheet walk-step" id="presentar-cierre" data-walk-step tabindex="-1">
-      <header><div class="walk-meta"><span>7 de 7</span><span>14:35–15:00</span></div><h2>Documentación y cierre</h2></header>
+      <header><div class="walk-meta"><span>7 de 7</span><span class="walk-time">14:35–15:00</span></div><h2>Documentación y cierre</h2></header>
       <div class="walk-body">
-        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Documentación</strong> y señala los dos PDF.</li><li>Deja el tablero abierto. Si preguntan por la limpieza, despliega <strong>Cobertura y calidad de los datos</strong>.</li></ol></section>
-        <section class="walk-voice"><h3>Cómo contarlo</h3><p>En el informe técnico está cómo trabajamos los datos y cómo evaluamos los modelos. En el de negocio pueden revisar los indicadores. Lo que vimos aquí describe cómo usa la IA el grupo que respondió. Para saber si cambia el aprendizaje, tendríamos que medirlo directamente. Gracias.</p></section>
+        <section class="walk-cues"><h3>En pantalla</h3><ol><li>Entra a <strong>Documentación</strong> y señala los dos PDF.</li><li class="walk-more">Baja a <strong>Tablas de resultados</strong>.</li><li class="walk-more">Abre <strong>Cobertura y calidad de los datos</strong> y <strong>Reproducibilidad</strong>.</li><li>Deja el tablero abierto para las preguntas.</li></ol></section>
+        <section class="walk-voice"><h3>Cómo contarlo</h3>
+          <p>En el informe técnico está cómo trabajamos los datos y cómo evaluamos los modelos. En el de negocio pueden revisar los indicadores y qué significan para el proyecto.</p>
+          <p class="walk-more">También pueden descargar las tablas de herramientas y de estadística descriptiva. Son datos resumidos del grupo, como los conteos y las medianas.</p>
+          <p class="walk-more">Si les interesa la limpieza, aquí dice que usamos Python para tratar las 18 columnas del formulario de IA y las 9 que tomamos del de bienestar. En el notebook se ve la regla que usamos para cada pregunta. Y en «Reproducibilidad» están las versiones de las bibliotecas y la semilla que fijamos para repetir los experimentos.</p>
+          <p>Lo que vimos aquí describe cómo usa la IA el grupo que respondió. Para saber si cambia el aprendizaje, tendríamos que medirlo directamente. Gracias.</p>
+        </section>
       </div>
     </article>
 
@@ -370,6 +429,12 @@ const sectionLinks = [...document.querySelectorAll('aside nav a')];
 const viewLinks = [...document.querySelectorAll('.view-strip a')];
 const previous = document.querySelector('#paso-anterior');
 const next = document.querySelector('#paso-siguiente');
+const briefMode = document.querySelector('input[name="version-recorrido"][value="breve"]');
+function updateWalkMode() {
+  walkView.toggleAttribute('data-breve', briefMode.checked);
+}
+document.querySelector('#duracion-recorrido').addEventListener('change', updateWalkMode);
+updateWalkMode();
 
 function showView(moveFocus = false) {
   const fragment = location.hash.slice(1);
